@@ -2,8 +2,8 @@ import { Component, ElementRef, OnDestroy, OnInit, ViewChild, computed, effect, 
 import * as L from 'leaflet';
 import { CensusStore } from '../census/census.store';
 import {
-  AVAILABLE_YEARS, CENSUS_YEARS, CHANGE_SCALE, MapMode, NO_DATA_COLOR, POPULATION_SCALE, Scale, YearData,
-  binIndex, groupShares, groupsFor, lighten, majority, majorityColor, shareScale
+  CHANGE_SCALE, MapMode, NO_DATA_COLOR, POPULATION_SCALE, Scale, TOPICS, Topic, YearData,
+  binIndex, groupShares, groupsFor, isLight, lighten, majority, majorityColor, shareScale
 } from '../census/census.model';
 import { I18n } from '../core/i18n.service';
 
@@ -11,16 +11,12 @@ import { I18n } from '../core/i18n.service';
 const CARD_GAP = 40;
 const EDGE = 8;
 
-/** Required credits for the boundary data (OSM is ODbL, simplemaps is CC BY 4.0). */
-const DATA_ATTRIBUTION =
-  'Granice: <a href="https://simplemaps.com/gis/country/me" target="_blank" rel="noopener">simplemaps</a>, ' +
-  '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors · ' +
-  'Podaci: <a href="https://www.monstat.org" target="_blank" rel="noopener">MONSTAT</a>';
-
 interface LegendItem {
   color: string;
   label: string;
 }
+
+const isTopic = (mode: MapMode): mode is Topic => (TOPICS as string[]).includes(mode);
 
 @Component({
   selector: 'app-map',
@@ -35,38 +31,46 @@ export class MapComponent implements OnInit, OnDestroy {
   @ViewChild('mapDiv', { static: true }) mapDiv!: ElementRef<HTMLDivElement>;
   @ViewChild('card') card?: ElementRef<HTMLDivElement>;
 
-  readonly timeline = CENSUS_YEARS.map(year => ({
-    year,
-    available: AVAILABLE_YEARS.includes(year),
-    position: ((year - CENSUS_YEARS[0]) / (CENSUS_YEARS[CENSUS_YEARS.length - 1] - CENSUS_YEARS[0])) * 100,
-  }));
-
-  /** Municipality names are hidden while the pointer is over the map. */
-  readonly pointerOnMap = signal(false);
+  /** Phones and tablets: no hover, a tap selects a municipality. */
+  readonly touch = typeof matchMedia !== 'undefined' && matchMedia('(hover: none)').matches;
   readonly cardPos = signal({ x: 0, y: 0 });
 
   private map?: L.Map;
   private layer?: L.GeoJSON;
   private labels?: L.LayerGroup;
   private readonly paths = new Map<string, L.Path>();
-  private fitted = false;
   private resizeObserver?: ResizeObserver;
+  private fitted = false;
+  private fitting = false;
+  /** Once the user pans or zooms, resizing no longer re-fits the country. */
+  private userMoved = false;
+  private attribution = '';
+
+  readonly timeline = computed(() => {
+    const { censusYears, dataYears } = this.store.country();
+    return censusYears.map((year, i) => ({
+      year,
+      available: dataYears.includes(year),
+      position: censusYears.length > 1 ? (i / (censusYears.length - 1)) * 100 : 50,
+    }));
+  });
 
   readonly modes = computed(() => {
     const prev = this.store.previousYear();
     return [
       { mode: 'nationality' as MapMode, label: this.i18n.t('modeNationality'), disabled: false },
       { mode: 'religion' as MapMode, label: this.i18n.t('modeReligion'), disabled: false },
+      { mode: 'language' as MapMode, label: this.i18n.t('modeLanguage'), disabled: false },
       { mode: 'population' as MapMode, label: this.i18n.t('modePopulation'), disabled: false },
       { mode: 'change' as MapMode, label: prev ? this.i18n.t('modeChange', { prev }) : this.i18n.t('change'), disabled: !prev },
     ];
   });
 
-  /** Clickable groups for the nationality / religion views. */
+  /** Clickable groups for the nationality / religion / language views. */
   readonly legendGroups = computed(() => {
     const mode = this.store.mode();
-    if (mode !== 'nationality' && mode !== 'religion') return null;
-    return groupsFor(mode).map(g => ({ key: g.key, color: g.color, light: lighten(g.color, 0.5) }));
+    if (!isTopic(mode)) return null;
+    return groupsFor(mode).map(g => ({ key: g.key, color: g.color, light: lighten(g.color, 0.5), special: !!g.special }));
   });
 
   /** Classed legend for population, change, or the share of the focused group. */
@@ -87,14 +91,14 @@ export class MapComponent implements OnInit, OnDestroy {
     return null;
   });
 
-  readonly hovered = computed(() => {
-    const id = this.store.hoveredId();
+  /** Summary for the hover card (desktop) or the selection bar (touch). */
+  readonly summary = computed(() => {
+    const id = this.touch ? this.store.pinnedId() : this.store.hoveredId();
     const entity = this.store.entity(id);
     if (!id || !entity) return null;
     return {
       entity,
-      nationality: majority(groupShares(entity, 'nationality')),
-      religion: majority(groupShares(entity, 'religion')),
+      rows: TOPICS.map(topic => ({ topic, share: majority(groupShares(entity, topic)) })),
       change: this.store.change(id),
     };
   });
@@ -119,7 +123,10 @@ export class MapComponent implements OnInit, OnDestroy {
       this.store.mode();
       this.store.focusGroup();
       this.i18n.lang();
-      untracked(() => this.renderLabels());
+      untracked(() => {
+        this.renderLabels();
+        this.updateAttribution();
+      });
     });
   }
 
@@ -127,12 +134,21 @@ export class MapComponent implements OnInit, OnDestroy {
     this.map = L.map(this.mapDiv.nativeElement, {
       zoomControl: true,
       zoomSnap: 0.25,
-      minZoom: 7,
+      minZoom: 6,
       maxZoom: 11,
     });
-    this.map.attributionControl.setPrefix(false).addAttribution(DATA_ATTRIBUTION);
-    // the toolbar above the map changes height with the selected view
-    this.resizeObserver = new ResizeObserver(() => this.map?.invalidateSize());
+    this.map.attributionControl.setPrefix(false);
+    this.map.on('dragstart zoomstart', () => {
+      if (!this.fitting) this.userMoved = true;
+    });
+    // a tap / click outside every municipality clears the selection
+    this.map.on('click', () => this.store.pinnedId.set(null));
+
+    // toolbar height, window size and phone rotation all change the map size
+    this.resizeObserver = new ResizeObserver(() => {
+      this.map?.invalidateSize();
+      if (!this.userMoved) this.fit();
+    });
     this.resizeObserver.observe(this.mapDiv.nativeElement);
   }
 
@@ -147,7 +163,15 @@ export class MapComponent implements OnInit, OnDestroy {
 
   focusedName() {
     const focus = this.store.focusGroup();
-    return focus ? this.i18n.group(focus) : '';
+    return focus ? this.i18n.name(focus) : '';
+  }
+
+  topicLabel(topic: Topic) {
+    return this.i18n.t(topic === 'nationality' ? 'nationality' : topic === 'religion' ? 'religion' : 'motherTongue');
+  }
+
+  showDetails() {
+    document.getElementById('details')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   // ---------------------------------------------------------------- rendering
@@ -162,26 +186,40 @@ export class MapComponent implements OnInit, OnDestroy {
       onEachFeature: (feature, layer) => {
         const id: string = feature.properties.id;
         this.paths.set(id, layer as L.Path);
-        layer.on('mouseover', (e: L.LeafletMouseEvent) => {
-          this.store.hoveredId.set(id);
-          this.moveCard(e);
+        if (!this.touch) {
+          layer.on('mouseover', (e: L.LeafletMouseEvent) => {
+            this.store.hoveredId.set(id);
+            this.moveCard(e);
+          });
+          layer.on('mousemove', (e: L.LeafletMouseEvent) => this.moveCard(e));
+          layer.on('mouseout', () => {
+            if (this.store.hoveredId() === id) this.store.hoveredId.set(null);
+          });
+        }
+        layer.on('click', (e: L.LeafletMouseEvent) => {
+          L.DomEvent.stopPropagation(e);
+          this.store.togglePin(id);
         });
-        layer.on('mousemove', (e: L.LeafletMouseEvent) => this.moveCard(e));
-        layer.on('mouseout', () => {
-          if (this.store.hoveredId() === id) this.store.hoveredId.set(null);
-        });
-        layer.on('click', () => this.store.togglePin(id));
       },
     });
 
     if (!this.fitted) {
       // the view must exist before vector layers are added
-      this.map.invalidateSize();
-      this.map.fitBounds(this.layer.getBounds(), { padding: [16, 16], animate: false });
+      this.fit();
       this.fitted = true;
     }
     this.layer.addTo(this.map);
     this.renderLabels();
+  }
+
+  private fit() {
+    if (!this.map || !this.layer) return;
+    const size = this.map.getSize();
+    if (!size.x || !size.y) return;
+    this.fitting = true;
+    // extra room for edge labels (Herceg Novi) and the attribution line at the bottom
+    this.map.fitBounds(this.layer.getBounds(), { paddingTopLeft: [30, 12], paddingBottomRight: [16, 28], animate: false });
+    this.fitting = false;
   }
 
   private renderLabels() {
@@ -198,11 +236,22 @@ export class MapComponent implements OnInit, OnDestroy {
           icon: L.divIcon({
             className: 'muni-label',
             iconSize: [0, 0],
-            html: `<div><span class="name">${f.properties.name}</span>${value ? `<span class="value">${value}</span>` : ''}</div>`,
+            html: `<div><span class="name">${this.i18n.name(f.properties.name)}</span>${value ? `<span class="value">${value}</span>` : ''}</div>`,
           }),
         });
       })
     ).addTo(this.map);
+  }
+
+  /** Required credits for the boundary data (simplemaps is CC BY 4.0, OSM is ODbL). */
+  private updateAttribution() {
+    if (!this.map) return;
+    if (this.attribution) this.map.attributionControl.removeAttribution(this.attribution);
+    this.attribution =
+      `${this.i18n.t('boundaries')}: <a href="https://simplemaps.com/gis/country/me" target="_blank" rel="noopener">simplemaps</a>, ` +
+      '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors · ' +
+      `${this.i18n.t('data')}: <a href="https://www.monstat.org" target="_blank" rel="noopener">MONSTAT</a>`;
+    this.map.attributionControl.addAttribution(this.attribution);
   }
 
   private labelValue(id: string): string {
@@ -233,10 +282,11 @@ export class MapComponent implements OnInit, OnDestroy {
     const fill = this.fillFor(id);
     const hovered = id === this.store.hoveredId();
     const pinned = id === this.store.pinnedId();
+    const border = isLight(fill) ? '#7d8691' : '#ffffff';
     return {
       fillColor: hovered ? lighten(fill, 0.35) : fill,
       fillOpacity: 1,
-      color: hovered || pinned ? '#1f2328' : '#ffffff',
+      color: hovered || pinned ? '#1f2328' : border,
       weight: pinned ? 3 : hovered ? 2.5 : 1,
       opacity: 1,
     };
@@ -281,7 +331,7 @@ export class MapComponent implements OnInit, OnDestroy {
     const point = e.containerPoint;
     const size = this.map.getSize();
     const width = this.card?.nativeElement.offsetWidth ?? 260;
-    const height = this.card?.nativeElement.offsetHeight ?? 170;
+    const height = this.card?.nativeElement.offsetHeight ?? 190;
 
     let x = point.x + CARD_GAP;
     if (x + width > size.x - EDGE) x = point.x - CARD_GAP - width;

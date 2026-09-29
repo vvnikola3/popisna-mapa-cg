@@ -1,4 +1,6 @@
-import { interpolateRgb, schemeReds } from 'd3';
+import { lab } from 'd3-color';
+import { interpolateRgb } from 'd3-interpolate';
+import { schemeReds } from 'd3-scale-chromatic';
 
 export interface Share {
   naziv: string;
@@ -17,6 +19,7 @@ export interface CensusEntity {
   gustina: number;
   nacionalnost: Share[];
   vjera: Share[];
+  jezik: Share[];
 }
 
 export interface CensusYear {
@@ -32,21 +35,33 @@ export interface YearData {
   geo: GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon, { id: string; name: string; label: [number, number] }>;
 }
 
-/** Every census held in Montenegro since WWII. Only some of them have data loaded yet. */
-export const CENSUS_YEARS = [1948, 1953, 1961, 1971, 1981, 1991, 2003, 2011, 2023];
-export const AVAILABLE_YEARS = [2011, 2023];
+/** Entry of public/data/<country>/teritorije.json. */
+export interface Territory {
+  id: string;
+  naziv: string;
+  /** Year the municipality was founded; absent = exists in every census with data. */
+  osnovana?: number;
+  /** Municipality it was part of before that. */
+  izdvojenaIz?: string;
+}
 
-export type MapMode = 'nationality' | 'religion' | 'population' | 'change';
-export type Topic = 'nationality' | 'religion';
+export type Topic = 'nationality' | 'religion' | 'language';
+export type MapMode = Topic | 'population' | 'change';
+export const TOPICS: Topic[] = ['nationality', 'religion', 'language'];
 
 // ------------------------------------------------------------------ groups & colours
 
 export interface Group {
   key: string;
   color: string;
-  /** Raw census categories that make up this group. */
+  /** Raw census categories that make up this group (names differ between censuses). */
   members: string[];
+  /** Shown and mappable, but never counted as a majority (e.g. undeclared). */
+  special?: boolean;
 }
+
+export const UNDECLARED_KEY = 'Neizjašnjeni';
+const UNDECLARED_COLOR = '#a08c74';
 
 export const NATIONALITY_GROUPS: Group[] = [
   { key: 'Crnogorci', color: '#c8102e', members: ['Crnogorci'] },
@@ -55,6 +70,10 @@ export const NATIONALITY_GROUPS: Group[] = [
   { key: 'Albanci', color: '#e07b1a', members: ['Albanci'] },
   { key: 'Muslimani', color: '#159a8c', members: ['Muslimani'] },
   { key: 'Hrvati', color: '#7b4fb3', members: ['Hrvati'] },
+  {
+    key: UNDECLARED_KEY, color: UNDECLARED_COLOR, special: true,
+    members: ['Ne želi da se izjasni', 'Neizjašnjeni i neopredijeljeni'],
+  },
 ];
 
 export const RELIGION_GROUPS: Group[] = [
@@ -62,45 +81,75 @@ export const RELIGION_GROUPS: Group[] = [
   // 2011 recorded "Islamska" and "Muslimanska" separately
   { key: 'Islamska', color: '#2e8b57', members: ['Islamska', 'Muslimanska'] },
   { key: 'Katolička', color: '#6d5bd0', members: ['Katolička'] },
-  { key: 'Ateisti i agnostici', color: '#6b7280', members: ['Ateisti', 'Agnostici'] },
+  // 2003 asked "not a believer" instead of atheist/agnostic
+  { key: 'Ateisti i agnostici', color: '#6b7280', members: ['Ateisti', 'Agnostici', 'Nije vjernik'] },
+  { key: UNDECLARED_KEY, color: UNDECLARED_COLOR, special: true, members: ['Ne želi da se izjasni'] },
+];
+
+export const LANGUAGE_GROUPS: Group[] = [
+  { key: 'Srpski', color: '#2b5ea7', members: ['Srpski'] },
+  { key: 'Crnogorski', color: '#c8102e', members: ['Crnogorski'] },
+  { key: 'Bosanski', color: '#2e8b57', members: ['Bosanski'] },
+  // deliberately not green: a light Bosnian tint (relative majority) would look the same
+  { key: 'Bošnjački', color: '#d4a017', members: ['Bošnjački'] },
+  { key: 'Albanski', color: '#e07b1a', members: ['Albanski'] },
+  { key: 'Srpskohrvatski', color: '#159a8c', members: ['Srpskohrvatski', 'Srpsko-Hrvatski', 'Hrvatsko-srpski', 'Hrvatsko-Srpski'] },
+  { key: 'Hrvatski', color: '#7b4fb3', members: ['Hrvatski'] },
+  // 2003 published undeclared and unknown together
+  {
+    key: UNDECLARED_KEY, color: UNDECLARED_COLOR, special: true,
+    members: ['Ne želi da se izjasni', 'Neizjašnjeni i nepoznato'],
+  },
 ];
 
 export const OTHER_KEY = 'Ostali';
 export const OTHER_COLOR = '#c4c9d0';
-export const NO_DATA_COLOR = '#e6e8eb';
+export const NO_DATA_COLOR = '#dfe3e8';
 
-export const groupsFor = (topic: Topic) => (topic === 'nationality' ? NATIONALITY_GROUPS : RELIGION_GROUPS);
+export const groupsFor = (topic: Topic): Group[] =>
+  topic === 'nationality' ? NATIONALITY_GROUPS : topic === 'religion' ? RELIGION_GROUPS : LANGUAGE_GROUPS;
+
+const listFor = (entity: CensusEntity, topic: Topic): Share[] =>
+  topic === 'nationality' ? entity.nacionalnost : topic === 'religion' ? entity.vjera : entity.jezik;
 
 export interface GroupShare {
   key: string;
   color: string;
   broj: number;
   procenat: number;
+  special?: boolean;
 }
 
-/** Collapses raw census categories into display groups plus "Ostali" (everything else, incl. undeclared). */
+/**
+ * Collapses raw census categories into display groups: regular groups by size,
+ * then special ones (undeclared), then "Ostali" (everything else).
+ */
 export function groupShares(entity: CensusEntity, topic: Topic): GroupShare[] {
-  const list = topic === 'nationality' ? entity.nacionalnost : entity.vjera;
+  const list = listFor(entity, topic);
   const total = entity.stanovnika;
   const shares = groupsFor(topic).map(g => {
     const broj = list.filter(s => g.members.includes(s.naziv)).reduce((a, s) => a + s.broj, 0);
-    return { key: g.key, color: g.color, broj, procenat: (broj / total) * 100 };
+    return { key: g.key, color: g.color, broj, procenat: (broj / total) * 100, special: !!g.special };
   });
   const rest = total - shares.reduce((a, s) => a + s.broj, 0);
   return [
-    ...shares.sort((a, b) => b.broj - a.broj),
-    { key: OTHER_KEY, color: OTHER_COLOR, broj: rest, procenat: (rest / total) * 100 },
+    ...shares.filter(s => !s.special).sort((a, b) => b.broj - a.broj),
+    ...shares.filter(s => s.special),
+    { key: OTHER_KEY, color: OTHER_COLOR, broj: rest, procenat: (rest / total) * 100, special: true },
   ];
 }
 
 export function majority(shares: GroupShare[]): GroupShare {
-  return shares.filter(s => s.key !== OTHER_KEY).reduce((a, b) => (b.broj > a.broj ? b : a));
+  return shares.filter(s => !s.special).reduce((a, b) => (b.broj > a.broj ? b : a));
 }
 
 export const lighten = (color: string, amount: number) => interpolateRgb(color, '#ffffff')(amount);
 
 /** Absolute majority gets the full colour, a relative majority a lighter tint. */
 export const majorityColor = (m: GroupShare) => (m.procenat > 50 ? m.color : lighten(m.color, 0.5));
+
+/** Pale fills need a dark outline, otherwise the borders disappear into the background. */
+export const isLight = (color: string) => lab(color).l > 80;
 
 // ------------------------------------------------------------------ classed scales
 
@@ -122,24 +171,11 @@ export const CHANGE_SCALE: Scale = {
   colors: ['#b2182b', '#d6604d', '#f4a582', '#fbe3d6', '#b8d5ea', '#4393c3'],
 };
 
+/** Share of one group: even the lowest class stays clearly tinted. */
 export const shareScale = (color: string): Scale => ({
   breaks: [5, 15, 30, 50, 70],
-  colors: [0.92, 0.78, 0.6, 0.4, 0.18, 0].map(t => lighten(color, t)),
+  colors: [0.8, 0.64, 0.48, 0.32, 0.16, 0].map(t => lighten(color, t)),
 });
-
-// ------------------------------------------------------------------ territorial changes
-
-/**
- * Municipalities created since the previous census, relative to the year in the key.
- * `split` lists what has been carved out of an existing municipality, `createdFrom`
- * names the municipality a new one used to belong to.
- */
-export const TERRITORIAL_CHANGES: Record<number, { split: Record<string, string[]>; createdFrom: Record<string, string> }> = {
-  2023: {
-    split: { ME03: ['ME23'], ME13: ['ME22'], ME16: ['ME24', 'ME25'] },
-    createdFrom: { ME22: 'ME13', ME23: 'ME03', ME24: 'ME16', ME25: 'ME16' },
-  },
-};
 
 export type Comparison =
   | { status: 'none' }

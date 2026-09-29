@@ -1,13 +1,13 @@
 // Parses MONSTAT "Stanovništvo Crne Gore prema polu, tipu naselja, nacionalnoj odnosno
 // etničkoj pripadnosti, vjeroispovijesti i maternjem jeziku po opštinama" (Popis 2011)
-// into public/data/popis-2011.json. Numbers in this release have no thousands separator.
+// into public/data/me/popis-2011.json. Numbers in this release have no thousands separator.
 
 const fs = require('fs');
 const path = require('path');
 const { areasById, withPercent } = require('./parse-helpers');
 
-const SRC = path.join(__dirname, 'sources');
-const OUT = path.join(__dirname, '..', 'public', 'data');
+const SRC = path.join(__dirname, 'sources', 'me');
+const OUT = path.join(__dirname, '..', 'public', 'data', 'me');
 const COUNTRY = 'Crna Gora';
 
 const lines = fs.readFileSync(path.join(SRC, 'monstat-2011.txt'), 'utf8').split(/\r?\n/);
@@ -22,6 +22,11 @@ const ETHNICITY_2 = ['Italijani', 'Jugosloveni', 'Mađari', 'Makedonci', 'Muslim
 // 2011 labels normalised to the names used in 2023 where they mean the same thing
 const RELIGION = ['Ukupno', 'Pravoslavna', 'Katolička', 'Islamska', 'Muslimanska', 'Adventistička', 'Agnostici',
   'Ateisti', 'Budistička', 'Hrišćani', 'Jehovini svjedoci', 'Protestantska', 'Ostale vjere', 'Ne želi da se izjasni'];
+// "Maternji" is a category of its own in the source (answer without a language name)
+const LANGUAGE_1 = ['Ukupno', 'Crnogorski', 'Srpski', 'Bosanski', 'Albanski', 'Hrvatski', 'Crnogorsko-srpski', 'Engleski',
+  'Hrvatsko-srpski', 'Bošnjački', 'Mađarski', 'Makedonski'];
+const LANGUAGE_2 = ['Maternji', 'Njemački', 'Romski', 'Rumunski', 'Ruski', 'Slovenački', 'Srpskohrvatski',
+  'Srpsko-crnogorski', 'Ostali jezici', 'Regionalni jezici', 'Ne želi da se izjasni'];
 
 /** Reads the 22 data rows (country + 21 municipalities) that follow `titleLine`. */
 function readRows(titleIndex, columns) {
@@ -52,6 +57,9 @@ const eth1At = findTitle('Tabela 4. STANOVNIŠTVO PREMA NACIONALNOJ');
 const eth1 = readRows(eth1At, ETHNICITY_1);
 const eth2 = readRows(findTitle('Tabela 4. STANOVNIŠTVO PREMA NACIONALNOJ', eth1At + 1), ETHNICITY_2);
 const religion = readRows(findTitle('Tabela 6. STANOVNIŠTVO PREMA VJEROISPOVIJESTI'), RELIGION);
+const lang1At = findTitle('Tabela 5. STANOVNIŠTVO PREMA MATERNJEM');
+const lang1 = readRows(lang1At, LANGUAGE_1);
+const lang2 = readRows(findTitle('Tabela 5. STANOVNIŠTVO PREMA MATERNJEM', lang1At + 1), LANGUAGE_2);
 
 // Tabela 2 (sex) comes out of the PDF as columns: 22 totals, then 22 male counts.
 function readSex() {
@@ -78,11 +86,13 @@ function entity(name, area) {
   const nationality = [...ETHNICITY_1.slice(1).map(k => ({ naziv: k, broj: eth1[name][k] })),
     ...ETHNICITY_2.map(k => ({ naziv: k, broj: eth2[name][k] }))];
   const religions = RELIGION.slice(1).map(k => ({ naziv: k, broj: religion[name][k] }));
-  for (const [key, list] of [['nacionalnost', nationality], ['vjera', religions]]) {
+  const languages = [...LANGUAGE_1.slice(1).map(k => ({ naziv: k, broj: lang1[name][k] })),
+    ...LANGUAGE_2.map(k => ({ naziv: k, broj: lang2[name][k] }))];
+  for (const [key, list] of [['nacionalnost', nationality], ['vjera', religions], ['jezik', languages]]) {
     const sum = list.reduce((a, b) => a + b.broj, 0);
     if (sum !== total) throw new Error(`${key} sum for ${name}: ${sum} / ${total}`);
   }
-  if (religion[name].Ukupno !== total) throw new Error(`Religion total for ${name}`);
+  if (religion[name].Ukupno !== total || lang1[name].Ukupno !== total) throw new Error(`Table total for ${name}`);
   return {
     naziv: name,
     stanovnika: total,
@@ -94,6 +104,7 @@ function entity(name, area) {
     gustina: Math.round((total / area) * 10) / 10,
     nacionalnost: withPercent(nationality, total),
     vjera: withPercent(religions, total),
+    jezik: withPercent(languages, total),
   };
 }
 

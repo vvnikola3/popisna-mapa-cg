@@ -10,8 +10,8 @@
 .timeline {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 14px 28px 10px 20px;
+  gap: 16px;
+  padding: 12px 28px 8px 20px;
   border-bottom: 1px solid var(--line);
   background: var(--card);
 }
@@ -27,8 +27,8 @@
 .track {
   position: relative;
   flex: 1;
-  height: 44px;
-  margin: 0 12px;
+  height: 42px;
+  margin: 0 14px;
 }
 
 .line {
@@ -46,7 +46,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   padding: 0;
   border: 0;
   background: none;
@@ -83,41 +83,13 @@
   &:disabled { cursor: not-allowed; }
 }
 
-// ------------------------------------------------------------------ map
-
-.stage {
-  position: relative;
-  flex: 1;
-  min-height: 420px;
-}
-
-.map {
-  position: absolute;
-  inset: 0;
-  background: #f3f5f7;
-}
-
-.status {
-  position: absolute;
-  top: 16px;
-  left: 50%;
-  z-index: 1000;
-  padding: 8px 14px;
-  border-radius: 8px;
-  background: var(--card);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transform: translateX(-50%);
-
-  &.error { background: #fde8e8; color: #9b1c1c; }
-}
-
 // ------------------------------------------------------------------ toolbar (view + legend)
 
 .toolbar {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 10px 20px 10px;
+  padding: 10px 20px;
   border-bottom: 1px solid var(--line);
   background: var(--card);
   font-size: 13px;
@@ -140,6 +112,7 @@
     color: var(--ink);
     font: inherit;
     font-weight: 500;
+    white-space: nowrap;
     cursor: pointer;
 
     &:hover:not(:disabled):not(.active) { background: #e6e8eb; }
@@ -171,6 +144,7 @@
   background: var(--card);
   color: var(--ink);
   font: inherit;
+  white-space: nowrap;
   cursor: pointer;
 
   &:hover { border-color: #c9cdd2; background: #f7f8f9; }
@@ -207,7 +181,7 @@
   list-style: none;
   font-variant-numeric: tabular-nums;
 
-  li { display: inline-flex; align-items: center; gap: 6px; }
+  li { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 }
 
 .legend-note {
@@ -235,13 +209,41 @@
   &:hover { text-decoration: underline; }
 }
 
-// ------------------------------------------------------------------ hover card
+// ------------------------------------------------------------------ map
+
+.stage {
+  position: relative;
+  flex: 1;
+  min-height: 320px;
+}
+
+.map {
+  position: absolute;
+  inset: 0;
+  background: #eaeef2;
+}
+
+.status {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  z-index: 1000;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--card);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transform: translateX(-50%);
+
+  &.error { background: #fde8e8; color: #9b1c1c; }
+}
+
+// ------------------------------------------------------------------ hover card (desktop)
 
 .hover-card {
   --accent: var(--red);
   position: absolute;
   z-index: 1001;
-  width: 250px;
+  width: 260px;
   padding: 12px 14px;
   border-left: 5px solid var(--accent);
   border-radius: 10px;
@@ -276,7 +278,7 @@
 }
 
 dl {
-  margin: 10px 0 0;
+  margin: 8px 0 0;
 
   dt {
     margin-top: 6px;
@@ -292,4 +294,83 @@ dl {
 
     .swatch { margin-right: 6px; }
   }
+}
+
+// ------------------------------------------------------------------ selection bar (touch)
+
+.selection-bar {
+  --accent: var(--red);
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 28px;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px 10px 14px;
+  border-left: 5px solid var(--accent);
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.25);
+  font-size: 13px;
+}
+
+.sb-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+
+  strong { font-size: 16px; }
+  span { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .sb-majority { color: var(--ink); font-weight: 600; }
+  .swatch { width: 10px; height: 10px; margin-right: 5px; vertical-align: 0; }
+}
+
+.sb-details {
+  flex: none;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--red);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sb-close {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: #f1f2f4;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+// ------------------------------------------------------------------ small screens
+
+@media (max-width: 860px) {
+  .timeline { gap: 8px; padding: 10px 18px 6px 12px; }
+  .timeline-label { display: none; }
+  .track { margin: 0 12px; }
+  .year .text { font-size: 11px; }
+
+  .toolbar { gap: 6px; padding: 8px 12px; }
+
+  // one scrollable row instead of wrapping into many lines
+  .modes, .legend, .scale {
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  .modes { align-self: stretch; }
+  .legend-note .hint { display: none; }
 }

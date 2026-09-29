@@ -1,11 +1,12 @@
 # Popisna mapa Crne Gore
 
-Interaktivna mapa rezultata popisa stanovništva Crne Gore po opštinama: nacionalna i
-vjerska struktura, broj stanovnika i promjena između popisa, sa timeline-om popisa
-od 1948. do 2023. (trenutno sa podacima za 2011. i 2023.).
+Interaktivna mapa rezultata popisa stanovništva Crne Gore po opštinama: nacionalna,
+vjerska i jezička struktura, broj stanovnika i promjena između popisa, sa timeline-om
+popisa od 1948. do 2023. (trenutno sa podacima za 2003., 2011. i 2023.).
+Ćirilica, latinica i engleski; radi i na telefonu. Planirane su i druge države regiona.
 
 Aplikacija je statična (Angular + Leaflet + d3): podaci se unaprijed pripremaju
-skriptama u `scripts/` i servira ih se kao JSON iz `public/data/`.
+skriptama u `scripts/` i servira ih se kao JSON iz `public/data/<država>/`.
 
 ## Pokretanje
 
@@ -22,25 +23,39 @@ npm test             # unit testovi (Karma)
 npm run data:build   # ponovo generiše public/data/ iz izvora
 ```
 
+## Linkovi
+
+Adresa uvijek opisuje ono što je prikazano, pa se svaki prikaz može podijeliti:
+
+```
+/<država>/<godina>/<prikaz>[/<opština>][?udio=<grupa>]
+/me/2003/jezik/plav?udio=bosnjacki
+/me/2023/promjena
+```
+
+Prikazi: `nacionalnost`, `vjera`, `jezik`, `stanovnistvo`, `promjena`.
+Pošto su to putanje, hosting mora sve nepoznate adrese vraćati na `index.html`;
+za Netlify i Cloudflare Pages to radi `public/_redirects`.
+
 ## Struktura
 
 ```
-public/data/          geo-<godina>.json (granice), popis-<godina>.json (podaci)
+public/data/me/       geo-<godina>.json (granice), popis-<godina>.json (podaci), teritorije.json
 scripts/              priprema podataka iz MONSTAT PDF-ova i OSM-a – vidi scripts/README.md
-src/app/census/       model podataka, grupe, skale boja, zajedničko stanje (store)
-src/app/map/          mapa, timeline, izbor prikaza i legenda, kartica na hover
+src/app/census/       model podataka, grupe, skale boja, države, zajedničko stanje (store)
+src/app/map/          mapa, timeline, izbor prikaza i legenda, kartica na hover / traka na dodir
 src/app/panel/        lijevi panel sa pie chartovima i tabelama
-src/app/core/         prevodi (CG / EN)
+src/app/core/         prevodi (ćirilica / latinica / EN), transliteracija, zastave
 ```
 
 ## Izvori podataka i licence
 
-- **Popis stanovništva:** [MONSTAT](https://www.monstat.org) – Popis 2011. i Popis 2023.
+- **Popis stanovništva:** [MONSTAT](https://www.monstat.org) – popisi 2003., 2011. i 2023.
 - **Granice opština:** [simplemaps](https://simplemaps.com/gis/country/me), licenca
   [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 - **Granica opštine Zeta:** © [OpenStreetMap](https://www.openstreetmap.org/copyright)
   contributors, licenca [ODbL](https://opendatacommons.org/licenses/odbl/)
 
 Oba izvora granica zahtijevaju navođenje – ono je prikazano u uglu mape.
-Granice su izmijenjene: Zeta je isječena iz Podgorice, a za 2011. su spojene
+Granice su izmijenjene: Zeta je isječena iz Podgorice, a za ranije popise su spojene
 opštine koje su kasnije razdvojene (detalji u `scripts/README.md`).

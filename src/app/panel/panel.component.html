@@ -2,26 +2,32 @@
   <div class="head">
     <nav class="crumbs">
       @if (isCountry()) {
-        <span>{{ i18n.t('country') }}</span>
+        <span>{{ countryName() }}</span>
       } @else {
-        <button type="button" (click)="showCountry()">{{ i18n.t('country') }}</button>
+        <button type="button" (click)="showCountry()">{{ countryName() }}</button>
         <span class="sep">›</span>
-        <span>{{ e.naziv }}</span>
+        <span>{{ i18n.name(e.naziv) }}</span>
       }
     </nav>
 
     <div class="title-row">
-      <h2>{{ isCountry() ? i18n.t('country') : e.naziv }}</h2>
+      <h2>{{ isCountry() ? countryName() : i18n.name(e.naziv) }}</h2>
       @if (isPinned()) {
         <button type="button" class="pin-chip" (click)="showCountry()" [attr.aria-label]="i18n.t('unpin')">
-          📌 {{ i18n.t('pinned') }} <span aria-hidden="true">✕</span>
+          {{ i18n.t('pinned') }} <span aria-hidden="true">✕</span>
         </button>
       }
     </div>
-    <p class="meta">
-      {{ i18n.t('census') }} {{ store.year() }}
-      @if (isCountry()) { · {{ i18n.t('hint') }} }
-    </p>
+    <div class="meta-row">
+      <p class="meta">
+        {{ i18n.t('census') }} {{ store.year() }}.
+        @if (isCountry()) { · {{ i18n.t(touch ? 'hintTouch' : 'hint') }} }
+      </p>
+      <button type="button" class="share" (click)="copyLink()" [class.done]="copied()">
+        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        {{ copied() ? i18n.t('linkCopied') : i18n.t('share') }}
+      </button>
+    </div>
   </div>
 
   <div class="stats">
@@ -56,18 +62,18 @@
 
   @for (view of topics(); track view.topic) {
     <section class="card">
-      <h3>{{ i18n.t(view.topic === 'nationality' ? 'nationality' : 'religion') }}</h3>
+      <h3>{{ topicTitle(view.topic) }}</h3>
 
       <div class="pies" [class.single]="!view.previous">
         @if (view.previous) {
           <figure>
-            <app-pie-chart [shares]="view.previous" [names]="groupName" [size]="150" />
+            <app-pie-chart [shares]="view.previous" [names]="groupName" [size]="140" />
             <figcaption>{{ store.previousYear() }}.</figcaption>
           </figure>
           <span class="arrow" aria-hidden="true">→</span>
         }
         <figure>
-          <app-pie-chart [shares]="view.current" [names]="groupName" [size]="view.previous ? 150 : 180" />
+          <app-pie-chart [shares]="view.current" [names]="groupName" [size]="view.previous ? 140 : 170" />
           <figcaption><strong>{{ store.year() }}.</strong></figcaption>
         </figure>
       </div>
@@ -83,7 +89,7 @@
         <tbody>
           @for (row of view.rows; track row.key) {
             <tr>
-              <td><i class="swatch" [style.background]="row.color"></i>{{ i18n.group(row.key) }}</td>
+              <td><i class="swatch" [style.background]="row.color"></i>{{ i18n.name(row.key) }}</td>
               @if (view.previous) {
                 <td class="num">
                   @if (row.previous) {
@@ -127,6 +133,6 @@
   </section>
 
   <p class="source">
-    {{ i18n.t('source') }}: {{ source() }}. {{ i18n.t('areaNote') }}
+    {{ i18n.t('source') }}: {{ i18n.name(source()) }}. {{ i18n.t('areaNote') }}
   </p>
 }

@@ -1,0 +1,31 @@
+{
+  "drzava": { "id": "ME", "naziv": "Crna Gora" },
+  "napomena": "Opštine bez polja 'osnovana' postoje u svim popisima za koje imamo podatke (od 2003). 'izdvojenaIz' je opština čiji je dio bila prije osnivanja.",
+  "opstine": [
+    { "id": "ME01", "naziv": "Andrijevica" },
+    { "id": "ME02", "naziv": "Bar" },
+    { "id": "ME03", "naziv": "Berane" },
+    { "id": "ME04", "naziv": "Bijelo Polje" },
+    { "id": "ME05", "naziv": "Budva" },
+    { "id": "ME06", "naziv": "Cetinje" },
+    { "id": "ME07", "naziv": "Danilovgrad" },
+    { "id": "ME08", "naziv": "Herceg Novi" },
+    { "id": "ME09", "naziv": "Kolašin" },
+    { "id": "ME10", "naziv": "Kotor" },
+    { "id": "ME11", "naziv": "Mojkovac" },
+    { "id": "ME12", "naziv": "Nikšić" },
+    { "id": "ME13", "naziv": "Plav" },
+    { "id": "ME14", "naziv": "Pljevlja" },
+    { "id": "ME15", "naziv": "Plužine" },
+    { "id": "ME16", "naziv": "Podgorica" },
+    { "id": "ME17", "naziv": "Rožaje" },
+    { "id": "ME18", "naziv": "Šavnik" },
+    { "id": "ME19", "naziv": "Tivat" },
+    { "id": "ME20", "naziv": "Ulcinj" },
+    { "id": "ME21", "naziv": "Žabljak" },
+    { "id": "ME22", "naziv": "Gusinje", "osnovana": 2014, "izdvojenaIz": "ME13" },
+    { "id": "ME23", "naziv": "Petnjica", "osnovana": 2013, "izdvojenaIz": "ME03" },
+    { "id": "ME24", "naziv": "Tuzi", "osnovana": 2018, "izdvojenaIz": "ME16" },
+    { "id": "ME25", "naziv": "Zeta", "osnovana": 2022, "izdvojenaIz": "ME16" }
+  ]
+}

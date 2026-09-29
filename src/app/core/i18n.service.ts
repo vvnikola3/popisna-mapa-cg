@@ -1,13 +1,16 @@
 import { Injectable, signal } from '@angular/core';
+import { toCyrillic } from './translit';
 
-export type Lang = 'cg' | 'en';
-export const LANGUAGES: { code: Lang; label: string; name: string }[] = [
-  { code: 'cg', label: 'CG', name: 'Crnogorski' },
-  { code: 'en', label: 'EN', name: 'English' },
+/** Cyrillic and Latin share one Montenegrin dictionary; Cyrillic is transliterated from it. */
+export type Lang = 'cyr' | 'lat' | 'en';
+export const LANGUAGES: { code: Lang; short: string; name: string }[] = [
+  { code: 'cyr', short: 'ЋИР', name: 'Ћирилица' },
+  { code: 'lat', short: 'LAT', name: 'Latinica' },
+  { code: 'en', short: 'EN', name: 'English' },
 ];
 
-const CG = {
-  appTitle: 'Popisna mapa Crne Gore',
+const ME = {
+  appTitle: 'Popisna mapa',
   appSubtitle: 'Stanovništvo po opštinama kroz popise',
   menu: 'Meni',
   menuMap: 'Popisna mapa',
@@ -15,10 +18,10 @@ const CG = {
   menuSources: 'Izvori podataka',
   menuAbout: 'O projektu',
   soon: 'uskoro',
-  language: 'Jezik',
+  language: 'Jezik i pismo',
+  countrySelect: 'Država',
   census: 'Popis',
   censuses: 'Popisi',
-  country: 'Crna Gora',
   population: 'Stanovnika',
   area: 'Površina',
   density: 'Gustina',
@@ -27,6 +30,7 @@ const CG = {
   perKm2: 'st./km²',
   nationality: 'Nacionalna pripadnost',
   religion: 'Vjeroispovijest',
+  motherTongue: 'Maternji jezik',
   sexAge: 'Pol i starost',
   male: 'Muškarci',
   female: 'Žene',
@@ -35,6 +39,7 @@ const CG = {
   view: 'Prikaz na mapi',
   modeNationality: 'Nacionalna većina',
   modeReligion: 'Vjerska većina',
+  modeLanguage: 'Jezička većina',
   modePopulation: 'Broj stanovnika',
   modeChange: 'Promjena od {prev}.',
   absolute: 'apsolutna većina (> 50%)',
@@ -47,23 +52,26 @@ const CG = {
   changedBorders: 'Granice promijenjene od {prev}. – tada je obuhvatala i: {list}.',
   createdAfter: 'Opština nije postojala {prev}. – bila je dio opštine {parent}.',
   noPrevious: 'Nema ranijeg popisa za poređenje.',
-  pinned: 'Zakačeno',
-  unpin: 'Otkači',
-  hint: 'Pređi mišem preko opštine, klikom je zakačiš.',
-  majority: 'Većina',
+  pinned: 'Izabrano',
+  unpin: 'Poništi izbor',
+  hint: 'Pređi mišem preko opštine, klikom je izabereš.',
+  hintTouch: 'Dodirni opštinu za detalje.',
+  details: 'Detalji',
   change: 'Promjena',
-  municipalities: 'opština',
   loading: 'Učitavanje podataka…',
   loadError: 'Podaci nisu mogli biti učitani.',
   source: 'Izvor',
   areaNote: 'Površina je približna, izračunata iz granica na mapi.',
-  others: 'Ostali',
+  boundaries: 'Granice',
+  data: 'Podaci',
+  share: 'Kopiraj link',
+  linkCopied: 'Link je kopiran',
 };
 
-type Key = keyof typeof CG;
+type Key = keyof typeof ME;
 
 const EN: Record<Key, string> = {
-  appTitle: 'Montenegro Census Map',
+  appTitle: 'Census Map',
   appSubtitle: 'Population by municipality across censuses',
   menu: 'Menu',
   menuMap: 'Census map',
@@ -72,9 +80,9 @@ const EN: Record<Key, string> = {
   menuAbout: 'About',
   soon: 'soon',
   language: 'Language',
+  countrySelect: 'Country',
   census: 'Census',
   censuses: 'Censuses',
-  country: 'Montenegro',
   population: 'Population',
   area: 'Area',
   density: 'Density',
@@ -83,6 +91,7 @@ const EN: Record<Key, string> = {
   perKm2: 'per km²',
   nationality: 'Ethnicity',
   religion: 'Religion',
+  motherTongue: 'Mother tongue',
   sexAge: 'Sex and age',
   male: 'Men',
   female: 'Women',
@@ -91,6 +100,7 @@ const EN: Record<Key, string> = {
   view: 'Map view',
   modeNationality: 'Ethnic majority',
   modeReligion: 'Religious majority',
+  modeLanguage: 'Language majority',
   modePopulation: 'Population',
   modeChange: 'Change since {prev}',
   absolute: 'absolute majority (> 50%)',
@@ -103,21 +113,24 @@ const EN: Record<Key, string> = {
   changedBorders: 'Borders changed since {prev} – it then also included: {list}.',
   createdAfter: 'The municipality did not exist in {prev} – it was part of {parent}.',
   noPrevious: 'No earlier census to compare with.',
-  pinned: 'Pinned',
-  unpin: 'Unpin',
-  hint: 'Hover over a municipality, click to pin it.',
-  majority: 'Majority',
+  pinned: 'Selected',
+  unpin: 'Clear selection',
+  hint: 'Hover over a municipality, click to select it.',
+  hintTouch: 'Tap a municipality for details.',
+  details: 'Details',
   change: 'Change',
-  municipalities: 'municipalities',
   loading: 'Loading data…',
   loadError: 'Could not load the data.',
   source: 'Source',
   areaNote: 'Area is approximate, computed from the map boundaries.',
-  others: 'Others',
+  boundaries: 'Boundaries',
+  data: 'Data',
+  share: 'Copy link',
+  linkCopied: 'Link copied',
 };
 
-/** English names of census groups; Montenegrin uses the census keys as they are. */
-const GROUPS_EN: Record<string, string> = {
+/** English names of census groups and countries; Montenegrin uses the keys as they are. */
+const NAMES_EN: Record<string, string> = {
   Crnogorci: 'Montenegrins',
   Srbi: 'Serbs',
   Bošnjaci: 'Bosniaks',
@@ -125,11 +138,23 @@ const GROUPS_EN: Record<string, string> = {
   Muslimani: 'Muslims',
   Hrvati: 'Croats',
   Ostali: 'Others',
+  Neizjašnjeni: 'Undeclared',
   Pravoslavna: 'Orthodox',
   Islamska: 'Islam',
   Katolička: 'Catholic',
   'Ateisti i agnostici': 'Atheists & agnostics',
+  Srpski: 'Serbian',
+  Crnogorski: 'Montenegrin',
+  Bosanski: 'Bosnian',
+  Bošnjački: 'Bosniak',
+  Albanski: 'Albanian',
+  Srpskohrvatski: 'Serbo-Croatian',
+  Hrvatski: 'Croatian',
   'Crna Gora': 'Montenegro',
+  Srbija: 'Serbia',
+  'Bosna i Hercegovina': 'Bosnia and Herzegovina',
+  Hrvatska: 'Croatia',
+  'Sjeverna Makedonija': 'North Macedonia',
 };
 
 const STORAGE_KEY = 'popis-lang';
@@ -138,9 +163,13 @@ const STORAGE_KEY = 'popis-lang';
 export class I18n {
   readonly lang = signal<Lang>(this.restore());
 
+  constructor() {
+    this.applyDocumentLang(this.lang());
+  }
+
   setLang(lang: Lang) {
     this.lang.set(lang);
-    document.documentElement.lang = lang === 'cg' ? 'sr-Latn-ME' : 'en';
+    this.applyDocumentLang(lang);
     try {
       localStorage.setItem(STORAGE_KEY, lang);
     } catch {
@@ -149,12 +178,16 @@ export class I18n {
   }
 
   t(key: Key, params: Record<string, string | number> = {}): string {
-    const text = (this.lang() === 'en' ? EN : CG)[key];
-    return text.replace(/\{(\w+)\}/g, (_, p) => String(params[p] ?? ''));
+    const lang = this.lang();
+    const text = (lang === 'en' ? EN : ME)[key].replace(/\{(\w+)\}/g, (_, p) => String(params[p] ?? ''));
+    return lang === 'cyr' ? toCyrillic(text) : text;
   }
 
-  group(key: string): string {
-    return this.lang() === 'en' ? GROUPS_EN[key] ?? key : key;
+  /** A name from the data (municipality, census group, country) in the current script / language. */
+  name(text: string): string {
+    const lang = this.lang();
+    if (lang === 'en') return NAMES_EN[text] ?? text;
+    return lang === 'cyr' ? toCyrillic(text) : text;
   }
 
   num(value: number, decimals = 0): string {
@@ -172,13 +205,18 @@ export class I18n {
     return `${value > 0 ? '+' : value < 0 ? '−' : ''}${this.num(Math.abs(value), decimals)}%`;
   }
 
+  private applyDocumentLang(lang: Lang) {
+    document.documentElement.lang = lang === 'en' ? 'en' : lang === 'cyr' ? 'sr-Cyrl-ME' : 'sr-Latn-ME';
+  }
+
   private restore(): Lang {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved === 'cg' || saved === 'en') return saved;
+      if (saved === 'cyr' || saved === 'lat' || saved === 'en') return saved;
+      if (saved === 'cg') return 'lat'; // value used by the first version
     } catch {
       // ignore
     }
-    return 'cg';
+    return 'cyr';
   }
 }

@@ -1,12 +1,12 @@
 // Parses MONSTAT "Popis stanovništva, domaćinstava i stanova 2023" releases I and II
-// (text extracted with `pdftotext -raw -enc UTF-8`) into public/data/popis-2023.json.
+// (text extracted with `pdftotext -raw -enc UTF-8`) into public/data/me/popis-2023.json.
 
 const fs = require('fs');
 const path = require('path');
 const { num, section, splitsSummingToHead, areasById, withPercent } = require('./parse-helpers');
 
-const SRC = path.join(__dirname, 'sources');
-const OUT = path.join(__dirname, '..', 'public', 'data');
+const SRC = path.join(__dirname, 'sources', 'me');
+const OUT = path.join(__dirname, '..', 'public', 'data', 'me');
 const COUNTRY = 'Crna Gora';
 
 const I = fs.readFileSync(path.join(SRC, 'monstat-2023-I.txt'), 'utf8').split(/\r?\n/);
@@ -16,7 +16,7 @@ const geo = JSON.parse(fs.readFileSync(path.join(OUT, 'geo-2023.json'), 'utf8'))
 const municipalities = geo.features.map(f => f.properties.name);
 const names = [COUNTRY, ...municipalities];
 const rowName = line => names.find(n => line.startsWith(n + ' '));
-const out = Object.fromEntries(names.map(n => [n, { nacionalnost: [], vjera: [] }]));
+const out = Object.fromEntries(names.map(n => [n, { nacionalnost: [], vjera: [], jezik: [] }]));
 
 // Tabela 1 – total (count + percentage, unambiguous)
 for (const l of section(I, 'Tabela 1.', 'Grafik 1')) {
@@ -65,27 +65,44 @@ for (const l of section(I, 'Tabela 5.', 'Grafik 4')) {
   if (n) out[n].prosjecnaStarost = num(l.slice(n.length).trim().split(' ')[0]);
 }
 
-// II Tabela 1 – ethnicity: municipalities are columns, split over several pages
-{
+// II Tabele 1 i 3 – ethnicity and mother tongue: municipalities are columns, split over
+// several pages; a few category names wrap onto a second line
+function parseWideTable(start, end, key) {
   let cols = null;
-  for (const l of section(II, 'Tabela 1.', 'Tabela 2.')) {
+  let pending = null;
+  for (const l of section(II, start, end)) {
     if (/ u %/.test(l) && !/^\d/.test(l)) {
       const header = l.split(' u %').map(x => x.trim()).filter(Boolean);
       if (header.every(h => names.includes(h))) cols = header;
+      pending = null;
       continue;
     }
     if (!cols) continue;
-    const m = l.match(/^(.+?) ((?:\d|z |z$|- |-$).*)$/);
-    if (!m || m[1] === 'Ukupno' || m[1].startsWith('od toga')) continue;
-    const pairs = m[2].match(/\d{1,3}(?: \d{3})* \d+,\d+|z z|- -|z \d+,\d+/g) ?? [];
+    let label, values;
+    if (pending && /^(\d|z |- )/.test(l)) {
+      [label, values] = [pending, l];
+      pending = null;
+    } else if (!/\d/.test(l) && (l.endsWith('-') || pending)) {
+      pending = (pending ?? '') + l;
+      continue;
+    } else {
+      const m = l.match(/^(\p{L}.*?) ((?:\d|z |z$|- |-$).*)$/u);
+      pending = null;
+      if (!m) continue;
+      [, label, values] = m;
+    }
+    if (label === 'Ukupno' || label.startsWith('od toga')) continue;
+    const pairs = values.match(/\d{1,3}(?: \d{3})* \d+,\d+|z z|- -|z \d+,\d+/g) ?? [];
     // the first page also carries the country column in front
     const all = pairs.length === cols.length + 1 ? [COUNTRY, ...cols] : cols;
     all.forEach((c, j) => {
       const pm = pairs[j]?.match(/^(\d{1,3}(?: \d{3})*) (\d+,\d+)$/);
-      if (pm) out[c].nacionalnost.push({ naziv: m[1], broj: num(pm[1]), procenat: num(pm[2]) });
+      if (pm) out[c][key].push({ naziv: label, broj: num(pm[1]), procenat: num(pm[2]) });
     });
   }
 }
+parseWideTable('Tabela 1.', 'Tabela 2.', 'nacionalnost');
+parseWideTable('Tabela 3.', 'Tabela 4.', 'jezik');
 
 // II Tabela 2 – religion: municipalities are rows, religions split over two pages
 {
@@ -113,7 +130,7 @@ function entity(name, area) {
   const total = o.ukupno;
   if (o.muskarci + o.zene !== total) throw new Error(`Sex mismatch: ${name}`);
   if (Object.values(o.starost).reduce((a, b) => a + b, 0) !== total) throw new Error(`Age mismatch: ${name}`);
-  for (const key of ['nacionalnost', 'vjera']) {
+  for (const key of ['nacionalnost', 'vjera', 'jezik']) {
     const sum = o[key].reduce((a, b) => a + b.broj, 0);
     // small municipalities have suppressed ("z") cells, so allow a few percent
     if (sum > total || (total - sum) / total > 0.03) throw new Error(`${key} sum for ${name}: ${sum} / ${total}`);
@@ -129,6 +146,7 @@ function entity(name, area) {
     gustina: Math.round((total / area) * 10) / 10,
     nacionalnost: withPercent(o.nacionalnost, total),
     vjera: withPercent(o.vjera, total),
+    jezik: withPercent(o.jezik, total),
   };
 }
 

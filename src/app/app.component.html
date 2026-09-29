@@ -13,17 +13,64 @@
         <rect x="23" y="14" width="4" height="13" rx="1" fill="#c8102e"/>
       </svg>
     </span>
-    <div>
+    <div class="brand-text">
       <h1>{{ i18n.t('appTitle') }}</h1>
       <p>{{ i18n.t('appSubtitle') }}</p>
     </div>
   </div>
 
-  <div class="lang" role="group" [attr.aria-label]="i18n.t('language')">
-    @for (l of languages; track l.code) {
-      <button type="button" [class.active]="i18n.lang() === l.code" [attr.aria-pressed]="i18n.lang() === l.code"
-              [title]="l.name" (click)="i18n.setLang(l.code)">{{ l.label }}</button>
-    }
+  <div class="header-controls">
+    <!-- country -->
+    <div class="dropdown">
+      <button type="button" class="dd-button" [class.open]="openDropdown() === 'country'"
+              aria-haspopup="listbox" [attr.aria-expanded]="openDropdown() === 'country'"
+              [attr.aria-label]="i18n.t('countrySelect')" (click)="toggleDropdown('country')">
+        <app-flag [code]="store.country().code" [size]="24" />
+        <span class="dd-label country-name">{{ i18n.name(store.country().name) }}</span>
+        <svg class="caret" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+      </button>
+      @if (openDropdown() === 'country') {
+        <ul class="dd-menu" role="listbox" [attr.aria-label]="i18n.t('countrySelect')">
+          @for (c of countries; track c.code) {
+            <li role="option" [attr.aria-selected]="c.code === store.country().code" [attr.aria-disabled]="!c.available">
+              <button type="button" [disabled]="!c.available" [class.selected]="c.code === store.country().code" (click)="chooseCountry(c)">
+                <app-flag [code]="c.code" [size]="22" />
+                <span>{{ i18n.name(c.name) }}</span>
+                @if (!c.available) { <em>{{ i18n.t('soon') }}</em> }
+                @if (c.code === store.country().code) { <span class="check" aria-hidden="true">✓</span> }
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <!-- language / script -->
+    <div class="dropdown">
+      <button type="button" class="dd-button" [class.open]="openDropdown() === 'lang'"
+              aria-haspopup="listbox" [attr.aria-expanded]="openDropdown() === 'lang'"
+              [attr.aria-label]="i18n.t('language')" (click)="toggleDropdown('lang')">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="globe">
+          <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/>
+          <path d="M3 12h18M12 3c2.5 2.6 3.6 5.6 3.6 9s-1.1 6.4-3.6 9c-2.5-2.6-3.6-5.6-3.6-9S9.5 5.6 12 3z" fill="none" stroke="currentColor" stroke-width="1.7"/>
+        </svg>
+        <span class="dd-label">{{ currentLanguage().short }}</span>
+        <svg class="caret" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+      </button>
+      @if (openDropdown() === 'lang') {
+        <ul class="dd-menu right" role="listbox" [attr.aria-label]="i18n.t('language')">
+          @for (l of languages; track l.code) {
+            <li role="option" [attr.aria-selected]="l.code === i18n.lang()">
+              <button type="button" [class.selected]="l.code === i18n.lang()" (click)="chooseLanguage(l.code)">
+                <span class="short">{{ l.short }}</span>
+                <span>{{ l.name }}</span>
+                @if (l.code === i18n.lang()) { <span class="check" aria-hidden="true">✓</span> }
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
   </div>
 </header>
 
@@ -57,6 +104,6 @@
 </nav>
 
 <main class="layout">
-  <app-panel class="side" />
+  <app-panel class="side" id="details" />
   <app-map class="main-map" />
 </main>

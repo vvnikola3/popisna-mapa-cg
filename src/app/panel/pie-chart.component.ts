@@ -1,5 +1,5 @@
 import { Component, computed, input } from '@angular/core';
-import { arc, pie } from 'd3';
+import { arc, pie } from 'd3-shape';
 import { GroupShare } from '../census/census.model';
 
 interface Slice {

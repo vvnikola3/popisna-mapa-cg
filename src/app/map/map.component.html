@@ -2,7 +2,7 @@
   <span class="timeline-label">{{ i18n.t('censuses') }}</span>
   <div class="track">
     <div class="line"></div>
-    @for (item of timeline; track item.year) {
+    @for (item of timeline(); track item.year) {
       <button type="button"
               class="year"
               [style.left.%]="item.position"
@@ -38,8 +38,12 @@
                 [attr.aria-pressed]="isFocused(g.key)"
                 [title]="i18n.t('groupHint')"
                 (click)="store.toggleFocus(g.key)">
-          <i class="swatch pair"><i [style.background]="g.color"></i><i [style.background]="g.light"></i></i>
-          {{ i18n.group(g.key) }}
+          @if (g.special) {
+            <i class="swatch" [style.background]="g.color"></i>
+          } @else {
+            <i class="swatch pair"><i [style.background]="g.color"></i><i [style.background]="g.light"></i></i>
+          }
+          {{ i18n.name(g.key) }}
         </button>
       }
     }
@@ -64,10 +68,8 @@
   </p>
 </div>
 
-<div class="stage" [class.labels-hidden]="pointerOnMap()">
-  <div #mapDiv class="map"
-       (mouseenter)="pointerOnMap.set(true)"
-       (mouseleave)="pointerOnMap.set(false)"></div>
+<div class="stage" [class.labels-hidden]="store.hoveredId() !== null">
+  <div #mapDiv class="map"></div>
 
   @if (store.error()) {
     <div class="status error">{{ i18n.t('loadError') }}</div>
@@ -75,27 +77,38 @@
     <div class="status">{{ i18n.t('loading') }}</div>
   }
 
-
-  @if (hovered(); as h) {
-    <div #card class="hover-card"
-         [style.left.px]="cardPos().x"
-         [style.top.px]="cardPos().y"
-         [style.--accent]="h.nationality.color">
-      <div class="hc-name">{{ h.entity.naziv }}</div>
-      <div class="hc-pop">
-        {{ i18n.num(h.entity.stanovnika) }} <small>{{ i18n.t('population').toLowerCase() }}</small>
-      </div>
-      @if (h.change !== null) {
-        <div class="hc-change" [class.down]="h.change < 0" [class.up]="h.change > 0">
-          {{ i18n.signedPct(h.change) }} <small>{{ i18n.t('modeChange', { prev: store.previousYear()! }).toLowerCase() }}</small>
+  @if (summary(); as s) {
+    @if (touch) {
+      <div class="selection-bar" [style.--accent]="s.rows[0].share.color">
+        <div class="sb-main">
+          <strong>{{ i18n.name(s.entity.naziv) }}</strong>
+          <span>{{ i18n.num(s.entity.stanovnika) }} {{ i18n.t('population').toLowerCase() }}</span>
+          <span class="sb-majority"><i class="swatch" [style.background]="s.rows[0].share.color"></i>{{ i18n.name(s.rows[0].share.key) }} {{ i18n.pct(s.rows[0].share.procenat) }}</span>
         </div>
-      }
-      <dl>
-        <dt>{{ i18n.t('nationality') }}</dt>
-        <dd><i class="swatch" [style.background]="h.nationality.color"></i>{{ i18n.group(h.nationality.key) }} {{ i18n.pct(h.nationality.procenat) }}</dd>
-        <dt>{{ i18n.t('religion') }}</dt>
-        <dd><i class="swatch" [style.background]="h.religion.color"></i>{{ i18n.group(h.religion.key) }} {{ i18n.pct(h.religion.procenat) }}</dd>
-      </dl>
-    </div>
+        <button type="button" class="sb-details" (click)="showDetails()">{{ i18n.t('details') }} ↓</button>
+        <button type="button" class="sb-close" [attr.aria-label]="i18n.t('unpin')" (click)="store.pinnedId.set(null)">✕</button>
+      </div>
+    } @else {
+      <div #card class="hover-card"
+           [style.left.px]="cardPos().x"
+           [style.top.px]="cardPos().y"
+           [style.--accent]="s.rows[0].share.color">
+        <div class="hc-name">{{ i18n.name(s.entity.naziv) }}</div>
+        <div class="hc-pop">
+          {{ i18n.num(s.entity.stanovnika) }} <small>{{ i18n.t('population').toLowerCase() }}</small>
+        </div>
+        @if (s.change !== null) {
+          <div class="hc-change" [class.down]="s.change < 0" [class.up]="s.change > 0">
+            {{ i18n.signedPct(s.change) }} <small>{{ i18n.t('modeChange', { prev: store.previousYear()! }).toLowerCase() }}</small>
+          </div>
+        }
+        <dl>
+          @for (row of s.rows; track row.topic) {
+            <dt>{{ topicLabel(row.topic) }}</dt>
+            <dd><i class="swatch" [style.background]="row.share.color"></i>{{ i18n.name(row.share.key) }} {{ i18n.pct(row.share.procenat) }}</dd>
+          }
+        </dl>
+      </div>
+    }
   }
 </div>
