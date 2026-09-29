@@ -1,0 +1,101 @@
+<div class="timeline" role="group" [attr.aria-label]="i18n.t('censuses')">
+  <span class="timeline-label">{{ i18n.t('censuses') }}</span>
+  <div class="track">
+    <div class="line"></div>
+    @for (item of timeline; track item.year) {
+      <button type="button"
+              class="year"
+              [style.left.%]="item.position"
+              [class.active]="item.year === store.year()"
+              [class.available]="item.available"
+              [disabled]="!item.available"
+              [attr.aria-pressed]="item.year === store.year()"
+              [title]="item.available ? i18n.t('census') + ' ' + item.year : i18n.t('noCensusData')"
+              (click)="store.selectYear(item.year)">
+        <span class="dot"></span>
+        <span class="text">{{ item.year }}</span>
+      </button>
+    }
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="modes" role="radiogroup" [attr.aria-label]="i18n.t('view')">
+    @for (m of modes(); track m.mode) {
+      <button type="button" role="radio"
+              [attr.aria-checked]="store.mode() === m.mode"
+              [class.active]="store.mode() === m.mode"
+              [disabled]="m.disabled"
+              (click)="store.setMode(m.mode)">{{ m.label }}</button>
+    }
+  </div>
+
+  <div class="legend">
+    @if (legendGroups(); as groups) {
+      @for (g of groups; track g.key) {
+        <button type="button" class="group"
+                [class.active]="isFocused(g.key)"
+                [attr.aria-pressed]="isFocused(g.key)"
+                [title]="i18n.t('groupHint')"
+                (click)="store.toggleFocus(g.key)">
+          <i class="swatch pair"><i [style.background]="g.color"></i><i [style.background]="g.light"></i></i>
+          {{ i18n.group(g.key) }}
+        </button>
+      }
+    }
+    @if (legendScale(); as items) {
+      <ul class="scale">
+        @for (item of items; track item.label) {
+          <li><i class="swatch" [style.background]="item.color"></i>{{ item.label }}</li>
+        }
+      </ul>
+    }
+  </div>
+
+  <p class="legend-note">
+    @if (store.focusGroup()) {
+      {{ i18n.t('shareOf', { group: focusedName() }) }} ·
+      <button type="button" class="link" (click)="store.toggleFocus(store.focusGroup()!)">← {{ i18n.t('backToMajority') }}</button>
+    } @else if (legendGroups()) {
+      <span><i class="swatch dark"></i>{{ i18n.t('absolute') }}</span>
+      <span><i class="swatch light"></i>{{ i18n.t('relative') }}</span>
+      <span class="hint">{{ i18n.t('groupHint') }}</span>
+    }
+  </p>
+</div>
+
+<div class="stage" [class.labels-hidden]="pointerOnMap()">
+  <div #mapDiv class="map"
+       (mouseenter)="pointerOnMap.set(true)"
+       (mouseleave)="pointerOnMap.set(false)"></div>
+
+  @if (store.error()) {
+    <div class="status error">{{ i18n.t('loadError') }}</div>
+  } @else if (!store.current()) {
+    <div class="status">{{ i18n.t('loading') }}</div>
+  }
+
+
+  @if (hovered(); as h) {
+    <div #card class="hover-card"
+         [style.left.px]="cardPos().x"
+         [style.top.px]="cardPos().y"
+         [style.--accent]="h.nationality.color">
+      <div class="hc-name">{{ h.entity.naziv }}</div>
+      <div class="hc-pop">
+        {{ i18n.num(h.entity.stanovnika) }} <small>{{ i18n.t('population').toLowerCase() }}</small>
+      </div>
+      @if (h.change !== null) {
+        <div class="hc-change" [class.down]="h.change < 0" [class.up]="h.change > 0">
+          {{ i18n.signedPct(h.change) }} <small>{{ i18n.t('modeChange', { prev: store.previousYear()! }).toLowerCase() }}</small>
+        </div>
+      }
+      <dl>
+        <dt>{{ i18n.t('nationality') }}</dt>
+        <dd><i class="swatch" [style.background]="h.nationality.color"></i>{{ i18n.group(h.nationality.key) }} {{ i18n.pct(h.nationality.procenat) }}</dd>
+        <dt>{{ i18n.t('religion') }}</dt>
+        <dd><i class="swatch" [style.background]="h.religion.color"></i>{{ i18n.group(h.religion.key) }} {{ i18n.pct(h.religion.procenat) }}</dd>
+      </dl>
+    </div>
+  }
+</div>

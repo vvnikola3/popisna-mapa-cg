@@ -1,0 +1,57 @@
+@import 'leaflet/dist/leaflet.css';
+
+:root {
+  --red: #c8102e;
+  --red-dark: #9b0c23;
+  --red-soft: #fbe7ea;
+  --gold: #d4a017;
+  --ink: #1f2328;
+  --muted: #6b7280;
+  --line: #e4e6ea;
+  --bg: #f7f7f8;
+  --card: #ffffff;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
+
+// Municipality names drawn by Leaflet (outside Angular's view encapsulation).
+.muni-label {
+  pointer-events: none;
+
+  > div {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+    text-align: center;
+    line-height: 1.15;
+    color: #1f2328;
+    text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 2px #fff;
+    transition: opacity 0.2s;
+  }
+
+  .name { font-size: 11.5px; font-weight: 650; }
+  .value { font-size: 10.5px; font-variant-numeric: tabular-nums; }
+}
+
+.labels-hidden .muni-label > div { opacity: 0; }
+
+.leaflet-container { font-family: inherit; }
+.leaflet-interactive { cursor: pointer; }

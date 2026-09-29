@@ -1,0 +1,132 @@
+@if (entity(); as e) {
+  <div class="head">
+    <nav class="crumbs">
+      @if (isCountry()) {
+        <span>{{ i18n.t('country') }}</span>
+      } @else {
+        <button type="button" (click)="showCountry()">{{ i18n.t('country') }}</button>
+        <span class="sep">›</span>
+        <span>{{ e.naziv }}</span>
+      }
+    </nav>
+
+    <div class="title-row">
+      <h2>{{ isCountry() ? i18n.t('country') : e.naziv }}</h2>
+      @if (isPinned()) {
+        <button type="button" class="pin-chip" (click)="showCountry()" [attr.aria-label]="i18n.t('unpin')">
+          📌 {{ i18n.t('pinned') }} <span aria-hidden="true">✕</span>
+        </button>
+      }
+    </div>
+    <p class="meta">
+      {{ i18n.t('census') }} {{ store.year() }}
+      @if (isCountry()) { · {{ i18n.t('hint') }} }
+    </p>
+  </div>
+
+  <div class="stats">
+    <div class="stat primary">
+      <span class="label">{{ i18n.t('population') }}</span>
+      <span class="value">{{ i18n.num(e.stanovnika) }}</span>
+      @if (change() !== null) {
+        <span class="delta" [class.down]="change()! < 0" [class.up]="change()! > 0">
+          {{ i18n.signedPct(change()!) }} <small>{{ i18n.t('modeChange', { prev: store.previousYear()! }) }}</small>
+        </span>
+      }
+    </div>
+    <div class="stat">
+      <span class="label">{{ i18n.t('area') }}</span>
+      <span class="value">≈ {{ i18n.num(e.povrsinaKm2) }} <small>km²</small></span>
+    </div>
+    <div class="stat">
+      <span class="label">{{ i18n.t('density') }}</span>
+      <span class="value">{{ i18n.num(e.gustina, 1) }} <small>{{ i18n.t('perKm2') }}</small></span>
+    </div>
+    @if (e.prosjecnaStarost !== null) {
+      <div class="stat">
+        <span class="label">{{ i18n.t('avgAge') }}</span>
+        <span class="value">{{ i18n.num(e.prosjecnaStarost, 1) }} <small>{{ i18n.t('yearsShort') }}</small></span>
+      </div>
+    }
+  </div>
+
+  @if (note(); as n) {
+    <p class="note">{{ n }}</p>
+  }
+
+  @for (view of topics(); track view.topic) {
+    <section class="card">
+      <h3>{{ i18n.t(view.topic === 'nationality' ? 'nationality' : 'religion') }}</h3>
+
+      <div class="pies" [class.single]="!view.previous">
+        @if (view.previous) {
+          <figure>
+            <app-pie-chart [shares]="view.previous" [names]="groupName" [size]="150" />
+            <figcaption>{{ store.previousYear() }}.</figcaption>
+          </figure>
+          <span class="arrow" aria-hidden="true">→</span>
+        }
+        <figure>
+          <app-pie-chart [shares]="view.current" [names]="groupName" [size]="view.previous ? 150 : 180" />
+          <figcaption><strong>{{ store.year() }}.</strong></figcaption>
+        </figure>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            @if (view.previous) { <th>{{ store.previousYear() }}.</th> }
+            <th>{{ store.year() }}.</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of view.rows; track row.key) {
+            <tr>
+              <td><i class="swatch" [style.background]="row.color"></i>{{ i18n.group(row.key) }}</td>
+              @if (view.previous) {
+                <td class="num">
+                  @if (row.previous) {
+                    {{ i18n.pct(row.previous.procenat) }} <small>{{ i18n.num(row.previous.broj) }}</small>
+                  }
+                </td>
+              }
+              <td class="num">
+                <strong>{{ i18n.pct(row.current.procenat) }}</strong> <small>{{ i18n.num(row.current.broj) }}</small>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  }
+
+  <section class="card">
+    <h3>{{ i18n.t('sexAge') }}</h3>
+    <div class="split-bar">
+      <span class="m" [style.width.%]="(e.muskarci / e.stanovnika) * 100"></span>
+      <span class="z" [style.width.%]="(e.zene / e.stanovnika) * 100"></span>
+    </div>
+    <div class="split-legend">
+      <span><i class="dot m"></i>{{ i18n.t('male') }} {{ i18n.num(e.muskarci) }} ({{ i18n.pct((e.muskarci / e.stanovnika) * 100) }})</span>
+      <span><i class="dot z"></i>{{ i18n.t('female') }} {{ i18n.num(e.zene) }} ({{ i18n.pct((e.zene / e.stanovnika) * 100) }})</span>
+    </div>
+
+    <h4>{{ i18n.t('ageGroups') }}</h4>
+    @if (ageGroups(); as groups) {
+      @for (g of groups; track g.key) {
+        <div class="bar-row">
+          <span>{{ g.key }}</span>
+          <span class="bar"><span [style.width.%]="g.share"></span></span>
+          <span class="num">{{ i18n.pct(g.share) }}</span>
+        </div>
+      }
+    } @else {
+      <p class="muted">{{ i18n.t('noAgeData') }}</p>
+    }
+  </section>
+
+  <p class="source">
+    {{ i18n.t('source') }}: {{ source() }}. {{ i18n.t('areaNote') }}
+  </p>
+}
