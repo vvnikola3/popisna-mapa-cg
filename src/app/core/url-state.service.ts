@@ -6,9 +6,14 @@ import { MapMode, TOPICS, Topic, groupsFor } from '../census/census.model';
 /**
  * Keeps the address bar in sync with what is shown, so every view can be shared:
  *
- *   /<country>/<year>/<view>[/<municipality>][?udio=<group>]
+ *   <base>/<country>/<year>/<view>[/<municipality>][?udio=<group>]
  *   e.g. /me/2003/jezik/pljevlja, /me/2023/nacionalnost?udio=srbi
+ *
+ * <base> is the <base href> of the build: "/" on an own domain,
+ * "/popisna-mapa-cg/" on GitHub Pages.
  */
+const BASE = new URL(document.baseURI).pathname.replace(/\/?$/, '/');
+
 const MODE_SLUGS: Record<MapMode, string> = {
   nationality: 'nacionalnost',
   religion: 'vjera',
@@ -57,7 +62,8 @@ export class UrlState {
 
   /** Country, year and view can be set right away. */
   private applyFromUrl(): Requested | null {
-    const [country, year, mode, municipality] = location.pathname.split('/').filter(Boolean);
+    const path = location.pathname.startsWith(BASE) ? location.pathname.slice(BASE.length) : '';
+    const [country, year, mode, municipality] = path.split('/').filter(Boolean);
     const group = new URLSearchParams(location.search).get('udio') ?? undefined;
     if (!country) return null;
 
@@ -94,6 +100,6 @@ export class UrlState {
     const name = pinned ? this.store.current()?.census.opstine[pinned]?.naziv : null;
     if (name) parts.push(slugify(name));
     const focus = this.store.focusGroup();
-    return '/' + parts.join('/') + (focus ? `?udio=${slugify(focus)}` : '');
+    return BASE + parts.join('/') + (focus ? `?udio=${slugify(focus)}` : '');
   }
 }

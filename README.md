@@ -34,8 +34,18 @@ Adresa uvijek opisuje ono što je prikazano, pa se svaki prikaz može podijeliti
 ```
 
 Prikazi: `nacionalnost`, `vjera`, `jezik`, `stanovnistvo`, `promjena`.
-Pošto su to putanje, hosting mora sve nepoznate adrese vraćati na `index.html`;
-za Netlify i Cloudflare Pages to radi `public/_redirects`.
+Pošto su to putanje, hosting mora sve nepoznate adrese vraćati na aplikaciju:
+na GitHub Pages to radi `404.html` (kopija `index.html`, pravi je workflow),
+a za Netlify i Cloudflare Pages `public/_redirects`.
+
+## Objavljivanje (GitHub Pages)
+
+Svaki push na `main` pokreće `.github/workflows/deploy.yml`: build sa
+`--base-href /popisna-mapa-cg/` i objava na https://vvnikola3.github.io/popisna-mapa-cg/.
+Jednom treba podesiti: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+
+Za sopstveni domen: u workflow-u `BASE_HREF` postaje `/`, u `public/` se doda
+fajl `CNAME` sa domenom, a kod registra domena DNS zapisi prema GitHub Pages.
 
 ## Struktura
 
