@@ -18,9 +18,10 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # The site lives under https://<user>.github.io/<repo>/.
-  # With an own domain (CNAME) this becomes "/".
-  BASE_HREF: /${{ github.event.repository.name }}/
+  # The site is served from the root of https://popisi.org (custom domain set in
+  # Settings → Pages; with an Actions workflow no CNAME file is needed).
+  # Without a custom domain it would be /${{ github.event.repository.name }}/.
+  BASE_HREF: /
 
 jobs:
   build:

@@ -40,12 +40,17 @@ a za Netlify i Cloudflare Pages `public/_redirects`.
 
 ## Objavljivanje (GitHub Pages)
 
-Svaki push na `main` pokreće `.github/workflows/deploy.yml`: build sa
-`--base-href /popisna-mapa-cg/` i objava na https://vvnikola3.github.io/popisna-mapa-cg/.
-Jednom treba podesiti: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+Svaki push na `main` pokreće `.github/workflows/deploy.yml`: build i objava na
+**https://popisi.org**.
 
-Za sopstveni domen: u workflow-u `BASE_HREF` postaje `/`, u `public/` se doda
-fajl `CNAME` sa domenom, a kod registra domena DNS zapisi prema GitHub Pages.
+Podešavanja (jednom):
+- **Settings → Pages → Build and deployment → Source: GitHub Actions**
+- **Settings → Pages → Custom domain: `popisi.org`**, uz *Enforce HTTPS*
+  (sa Actions workflow-om fajl `CNAME` nije potreban)
+- DNS kod registra (Porkbun): `A` zapisi na 185.199.108–111.153 i `CNAME` `www` → `vvnikola3.github.io`
+
+Bez sopstvenog domena sajt bi bio na `https://vvnikola3.github.io/popisna-mapa-cg/`,
+a `BASE_HREF` u workflow-u bi morao biti `/popisna-mapa-cg/`.
 
 ## Struktura
 
