@@ -52,6 +52,16 @@ Podešavanja (jednom):
 Bez sopstvenog domena sajt bi bio na `https://vvnikola3.github.io/popisna-mapa-cg/`,
 a `BASE_HREF` u workflow-u bi morao biti `/popisna-mapa-cg/`.
 
+## Pretraživači i statistika
+
+- `scripts/build-pages.js` (poslije `ng build`, i u workflow-u) pravi pravu HTML stranicu za
+  svaki link – svaka ima svoj naslov, opis sa podacima popisa i canonical adresu, i vraća HTTP 200
+  (inače bi GitHub Pages dubokim linkovima odgovarao sa 404, a takve stranice Google ne indeksira).
+  Pravi i `sitemap.xml` i `robots.txt`. Lokalno: `npm run build:site`.
+- Slika za pregled linka (Facebook, Viber…): `public/og-image.png`, izvor `scripts/og-image.svg`.
+- Posjećenost: [GoatCounter](https://vvnikola3.goatcounter.com), bez kolačića. Prvu stranicu
+  broji njihova skripta (`index.html`), a promjene prikaza `UrlState`.
+
 ## Struktura
 
 ```

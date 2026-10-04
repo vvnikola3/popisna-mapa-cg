@@ -2,6 +2,17 @@ import { Injectable, effect, inject, untracked } from '@angular/core';
 import { CensusStore } from '../census/census.store';
 import { COUNTRIES } from '../census/countries';
 import { MapMode, TOPICS, Topic, groupsFor } from '../census/census.model';
+import { I18n } from './i18n.service';
+
+/** GoatCounter's script (index.html) – absent on localhost and when blocked. */
+declare global {
+  interface Window {
+    goatcounter?: { count(vars: { path: string; title?: string }): void };
+  }
+}
+
+/** A view is counted once it has stayed on screen this long (skips quick clicking through tabs). */
+const COUNT_AFTER_MS = 1500;
 
 /**
  * Keeps the address bar in sync with what is shown, so every view can be shared:
@@ -41,6 +52,10 @@ interface Requested {
 @Injectable({ providedIn: 'root' })
 export class UrlState {
   private readonly store = inject(CensusStore);
+  private readonly i18n = inject(I18n);
+  /** Last path reported to GoatCounter; the first one is counted by its own script on load. */
+  private countedPath: string | null = null;
+  private countTimer?: ReturnType<typeof setTimeout>;
   /** Parts of the URL that can only be applied once the data has loaded. */
   private pending: Requested | null = null;
 
@@ -58,7 +73,44 @@ export class UrlState {
       const path = this.buildUrl();
       if (this.pending) return; // don't overwrite a shared link before it has been applied
       if (path !== location.pathname + location.search) history.replaceState(history.state, '', path);
+      untracked(() => this.countView());
     });
+
+    // the browser tab / bookmark title follows the view, in the chosen script
+    effect(() => {
+      const pinned = this.store.pinnedId();
+      const name = pinned ? this.store.current()?.census.opstine[pinned]?.naziv : null;
+      const place = this.i18n.name(name ?? this.store.country().name);
+      document.title = `${place} – ${this.modeLabel()} ${this.store.year()} · ${this.i18n.t('appTitle')}`;
+    });
+  }
+
+  private modeLabel(): string {
+    const prev = this.store.previousYear();
+    switch (this.store.mode()) {
+      case 'nationality': return this.i18n.t('modeNationality');
+      case 'religion': return this.i18n.t('modeReligion');
+      case 'language': return this.i18n.t('modeLanguage');
+      case 'population': return this.i18n.t('modePopulation');
+      case 'density': return this.i18n.t('modeDensity');
+      case 'change': return prev ? this.i18n.t('modeChange', { prev }) : this.i18n.t('change');
+    }
+  }
+
+  /** Reports a new view (path without ?udio=…) to GoatCounter, once it has been looked at for a moment. */
+  private countView() {
+    const path = location.pathname;
+    if (this.countedPath === null) {
+      // the first URL of the visit was already counted by GoatCounter's own script
+      this.countedPath = path;
+      return;
+    }
+    clearTimeout(this.countTimer);
+    if (path === this.countedPath) return;
+    this.countTimer = setTimeout(() => {
+      this.countedPath = path;
+      window.goatcounter?.count({ path, title: document.title });
+    }, COUNT_AFTER_MS);
   }
 
   /** Country, year and view can be set right away. */

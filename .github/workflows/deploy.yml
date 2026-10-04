@@ -38,8 +38,11 @@ jobs:
 
       - run: npx ng build --base-href "$BASE_HREF"
 
-      # GitHub Pages has no rewrites: unknown paths such as /me/2003/jezik/plav
-      # get 404.html, so it has to be the app itself.
+      # one real HTML page per shareable view (own title/description, HTTP 200
+      # for search engines), plus sitemap.xml and robots.txt
+      - run: node scripts/build-pages.js
+
+      # any other path (typo, old or ?query-less variant) gets 404.html, so it opens the app too
       - run: cp dist/popisna-mapa-cg/browser/index.html dist/popisna-mapa-cg/browser/404.html
 
       - uses: actions/upload-pages-artifact@v3

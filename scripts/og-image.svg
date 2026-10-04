@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <!-- Source of public/og-image.png (link preview on Facebook, Viber, WhatsApp…).
+       Rendered to PNG with sharp (installed only in a scratch folder, not in package.json):
+       node -e "require('sharp')('scripts/og-image.svg').png().toFile('public/og-image.png')" -->
+  <rect width="1200" height="630" fill="#c8102e"/>
+  <rect y="600" width="1200" height="30" fill="#d4a017"/>
+
+  <!-- logo, same shapes as the favicon -->
+  <g transform="translate(96 150) scale(5.2)">
+    <rect width="32" height="32" rx="7" fill="#ffffff"/>
+    <rect x="5" y="17" width="4.5" height="10" rx="1" fill="#c8102e"/>
+    <rect x="11" y="11" width="4.5" height="16" rx="1" fill="#c8102e"/>
+    <rect x="17" y="6" width="4.5" height="21" rx="1" fill="#d4a017"/>
+    <rect x="23" y="14" width="4.5" height="13" rx="1" fill="#c8102e"/>
+  </g>
+
+  <g font-family="Segoe UI, Inter, Arial, sans-serif" fill="#ffffff">
+    <text x="320" y="225" font-size="84" font-weight="700">Popisna mapa</text>
+    <text x="322" y="290" font-size="38" opacity="0.92">Popisi stanovništva po opštinama</text>
+    <text x="322" y="372" font-size="32" opacity="0.85">Nacionalnost · Vjera · Jezik · Stanovništvo</text>
+    <text x="322" y="420" font-size="32" opacity="0.85">Crna Gora · 2003 · 2011 · 2023</text>
+    <text x="96" y="545" font-size="40" font-weight="700">popisi.org</text>
+  </g>
+</svg>
