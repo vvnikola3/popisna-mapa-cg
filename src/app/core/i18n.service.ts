@@ -37,10 +37,11 @@ const ME = {
   ageGroups: 'Starosne grupe',
   noAgeData: 'Starosna struktura nije dostupna u podacima ovog popisa.',
   view: 'Prikaz na mapi',
-  modeNationality: 'Nacionalna većina',
-  modeReligion: 'Vjerska većina',
-  modeLanguage: 'Jezička većina',
+  modeNationality: 'Nacionalnost',
+  modeReligion: 'Vjera',
+  modeLanguage: 'Jezik',
   modePopulation: 'Broj stanovnika',
+  modeDensity: 'Gustina naseljenosti',
   modeChange: 'Promjena od {prev}.',
   absolute: 'apsolutna većina (> 50%)',
   relative: 'relativna većina',
@@ -66,6 +67,16 @@ const ME = {
   data: 'Podaci',
   share: 'Kopiraj link',
   linkCopied: 'Link je kopiran',
+  colCount: 'broj',
+  colChange: 'promjena',
+  colShare: 'udio',
+  ppShort: 'p.p.',
+  countChangeHint: 'za koliko se promijenio broj ljudi u grupi (npr. 19.906 → 3.662 = −81,6%).',
+  changeHelpNa: 'poređenje nije moguće: kategorija nije postojala u jednom od popisa ili su se granice opštine u međuvremenu promijenile.',
+  changeHelpToggle: 'Objašnjenje kolona promjene',
+  countChangeShort: 'broj',
+  ppHint: 'za koliko se promijenio procenat grupe u ukupnom stanovništvu, u procentnim poenima (npr. 28,7% → 32,9% = +4,2).',
+  ofPopulation: 'stanovništva',
 };
 
 type Key = keyof typeof ME;
@@ -98,10 +109,11 @@ const EN: Record<Key, string> = {
   ageGroups: 'Age groups',
   noAgeData: 'Age structure is not available for this census.',
   view: 'Map view',
-  modeNationality: 'Ethnic majority',
-  modeReligion: 'Religious majority',
-  modeLanguage: 'Language majority',
+  modeNationality: 'Ethnicity',
+  modeReligion: 'Religion',
+  modeLanguage: 'Language',
   modePopulation: 'Population',
+  modeDensity: 'Population density',
   modeChange: 'Change since {prev}',
   absolute: 'absolute majority (> 50%)',
   relative: 'plurality',
@@ -127,6 +139,16 @@ const EN: Record<Key, string> = {
   data: 'Data',
   share: 'Copy link',
   linkCopied: 'Link copied',
+  colCount: 'count',
+  colChange: 'change',
+  colShare: 'share',
+  ppShort: 'pp',
+  countChangeHint: 'how much the number of people in the group changed (e.g. 19,906 → 3,662 = −81.6%).',
+  changeHelpNa: 'no comparison possible: the category was not recorded in one of the censuses, or the municipality’s borders changed in between.',
+  changeHelpToggle: 'Explain the change columns',
+  countChangeShort: 'count',
+  ppHint: 'how much the group’s share of the population changed, in percentage points (e.g. 28.7% → 32.9% = +4.2).',
+  ofPopulation: 'of the population',
 };
 
 /** English names of census groups and countries; Montenegrin uses the keys as they are. */
@@ -202,7 +224,13 @@ export class I18n {
   }
 
   signedPct(value: number, decimals = 1): string {
-    return `${value > 0 ? '+' : value < 0 ? '−' : ''}${this.num(Math.abs(value), decimals)}%`;
+    return `${this.signed(value, decimals)}%`;
+  }
+
+  /** +4,2 / −1,3 / 0,0 – rounded first, so a tiny change never shows as "−0,0". */
+  signed(value: number, decimals = 1): string {
+    const rounded = Number(value.toFixed(decimals));
+    return `${rounded > 0 ? '+' : rounded < 0 ? '−' : ''}${this.num(Math.abs(rounded), decimals)}`;
   }
 
   private applyDocumentLang(lang: Lang) {

@@ -1,6 +1,6 @@
 import { lab } from 'd3-color';
 import { interpolateRgb } from 'd3-interpolate';
-import { schemeReds } from 'd3-scale-chromatic';
+import { schemePuBu, schemeReds } from 'd3-scale-chromatic';
 
 export interface Share {
   naziv: string;
@@ -46,8 +46,10 @@ export interface Territory {
 }
 
 export type Topic = 'nationality' | 'religion' | 'language';
-export type MapMode = Topic | 'population' | 'change';
+export type MapMode = Topic | 'population' | 'density' | 'change';
 export const TOPICS: Topic[] = ['nationality', 'religion', 'language'];
+
+export const isTopic = (mode: MapMode): mode is Topic => (TOPICS as string[]).includes(mode);
 
 // ------------------------------------------------------------------ groups & colours
 
@@ -164,6 +166,12 @@ export const binIndex = (value: number, breaks: number[]) => breaks.filter(b => 
 export const POPULATION_SCALE: Scale = {
   breaks: [5000, 10000, 20000, 40000, 80000],
   colors: [...schemeReds[6]],
+};
+
+/** Inhabitants per km² (Plužine ≈ 2.5 … Tivat ≈ 360). */
+export const DENSITY_SCALE: Scale = {
+  breaks: [10, 25, 50, 100, 200],
+  colors: [...schemePuBu[6]],
 };
 
 export const CHANGE_SCALE: Scale = {

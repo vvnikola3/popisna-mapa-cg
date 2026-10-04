@@ -19,6 +19,7 @@ const MODE_SLUGS: Record<MapMode, string> = {
   religion: 'vjera',
   language: 'jezik',
   population: 'stanovnistvo',
+  density: 'gustina',
   change: 'promjena',
 };
 

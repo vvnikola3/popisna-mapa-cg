@@ -79,35 +79,90 @@
 
   @if (summary(); as s) {
     @if (touch) {
-      <div class="selection-bar" [style.--accent]="s.rows[0].share.color">
+      <div class="selection-bar" [style.--accent]="s.accent">
         <div class="sb-main">
           <strong>{{ i18n.name(s.entity.naziv) }}</strong>
           <span>{{ i18n.num(s.entity.stanovnika) }} {{ i18n.t('population').toLowerCase() }}</span>
-          <span class="sb-majority"><i class="swatch" [style.background]="s.rows[0].share.color"></i>{{ i18n.name(s.rows[0].share.key) }} {{ i18n.pct(s.rows[0].share.procenat) }}</span>
+          <span class="sb-line">
+            @switch (s.body.kind) {
+              @case ('focus') {
+                <i class="swatch" [style.background]="s.body.share.color"></i>{{ i18n.name(s.body.share.key) }} {{ i18n.pct(s.body.share.procenat) }}
+                @if (s.body.change; as c) {
+                  <small>({{ i18n.signed(c.share) }} {{ i18n.t('ppShort') }}@if (c.count !== null) {, {{ countChange(c.count) }}})</small>
+                }
+              }
+              @case ('groups') {
+                <i class="swatch" [style.background]="s.body.groups[0].color"></i>{{ i18n.name(s.body.groups[0].key) }} {{ i18n.pct(s.body.groups[0].procenat) }}
+              }
+              @case ('density') { {{ i18n.num(s.entity.gustina, 1) }} {{ i18n.t('perKm2') }} }
+              @default {
+                @if (s.change !== null) { {{ i18n.signedPct(s.change) }} {{ i18n.t('modeChange', { prev: store.previousYear()! }).toLowerCase() }} }
+                @else if (s.body.kind === 'change') { {{ i18n.t('notComparable') }} }
+              }
+            }
+          </span>
         </div>
-        <button type="button" class="sb-details" (click)="showDetails()">{{ i18n.t('details') }} ↓</button>
+        <button type="button" class="sb-details" (click)="showDetails()">{{ i18n.t('details') }}</button>
         <button type="button" class="sb-close" [attr.aria-label]="i18n.t('unpin')" (click)="store.pinnedId.set(null)">✕</button>
       </div>
     } @else {
       <div #card class="hover-card"
            [style.left.px]="cardPos().x"
            [style.top.px]="cardPos().y"
-           [style.--accent]="s.rows[0].share.color">
+           [style.--accent]="s.accent">
         <div class="hc-name">{{ i18n.name(s.entity.naziv) }}</div>
         <div class="hc-pop">
           {{ i18n.num(s.entity.stanovnika) }} <small>{{ i18n.t('population').toLowerCase() }}</small>
         </div>
-        @if (s.change !== null) {
-          <div class="hc-change" [class.down]="s.change < 0" [class.up]="s.change > 0">
-            {{ i18n.signedPct(s.change) }} <small>{{ i18n.t('modeChange', { prev: store.previousYear()! }).toLowerCase() }}</small>
-          </div>
-        }
-        <dl>
-          @for (row of s.rows; track row.topic) {
-            <dt>{{ topicLabel(row.topic) }}</dt>
-            <dd><i class="swatch" [style.background]="row.share.color"></i>{{ i18n.name(row.share.key) }} {{ i18n.pct(row.share.procenat) }}</dd>
+
+        @switch (s.body.kind) {
+          @case ('groups') {
+            <div class="hc-section">{{ topicLabel(s.body.topic) }}</div>
+            @for (g of s.body.groups; track g.key) {
+              <div class="hc-group">
+                <span class="hc-group-name"><i class="swatch" [style.background]="g.color"></i>{{ i18n.name(g.key) }}</span>
+                <span class="hc-group-pct">{{ i18n.pct(g.procenat) }}</span>
+                <span class="hc-bar"><span [style.width.%]="g.procenat" [style.background]="g.color"></span></span>
+              </div>
+            }
           }
-        </dl>
+          @case ('focus') {
+            <div class="hc-section">{{ topicLabel(s.body.topic) }}</div>
+            <div class="hc-focus">
+              <span class="hc-big">{{ i18n.pct(s.body.share.procenat) }}</span>
+              <span><i class="swatch" [style.background]="s.body.share.color"></i>{{ i18n.name(s.body.share.key) }}</span>
+            </div>
+            <div class="hc-sub">{{ i18n.num(s.body.share.broj) }} {{ i18n.t('ofPopulation') }}</div>
+            @if (s.body.change; as c) {
+              <div class="hc-sub hc-changes">
+                {{ i18n.t('modeChange', { prev: store.previousYear()! }) }}:
+                <span><strong>{{ i18n.signed(c.share) }}</strong> {{ i18n.t('ppShort') }}</span>
+                @if (c.count !== null) {
+                  · <span><strong>{{ countChange(c.count) }}</strong> {{ i18n.t('countChangeShort') }}</span>
+                }
+              </div>
+            }
+          }
+          @case ('density') {
+            <div class="hc-focus">
+              <span class="hc-big">{{ i18n.num(s.entity.gustina, 1) }}</span>
+              <span>{{ i18n.t('perKm2') }}</span>
+            </div>
+            <div class="hc-sub">{{ i18n.t('area') }} ≈ {{ i18n.num(s.entity.povrsinaKm2) }} km²</div>
+          }
+          @default {
+            @if (s.change !== null) {
+              <div class="hc-change" [class.down]="s.change < 0" [class.up]="s.change > 0">
+                {{ i18n.signedPct(s.change) }} <small>{{ i18n.t('modeChange', { prev: store.previousYear()! }).toLowerCase() }}</small>
+              </div>
+              @if (s.previous.status === 'same') {
+                <div class="hc-sub">{{ store.previousYear() }}: {{ i18n.num(s.previous.entity.stanovnika) }}</div>
+              }
+            } @else if (s.body.kind === 'change') {
+              <div class="hc-sub">{{ i18n.t('notComparable') }}</div>
+            }
+          }
+        }
       </div>
     }
   }

@@ -1,22 +1,27 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { arc, pie } from 'd3-shape';
-import { GroupShare } from '../census/census.model';
+import { GroupShare, OTHER_KEY } from '../census/census.model';
 
 interface Slice {
   key: string;
   path: string;
   color: string;
   title: string;
+  clickable: boolean;
 }
 
 @Component({
   selector: 'app-pie-chart',
   standalone: true,
   template: `
-    <svg [attr.viewBox]="viewBox()" [attr.width]="size()" [attr.height]="size()" role="img" [attr.aria-label]="label()">
+    <svg [attr.viewBox]="viewBox()" [attr.width]="size()" [attr.height]="size()" role="img" [attr.aria-label]="label()"
+         [class.has-selection]="!!selected()">
       <g [attr.transform]="'translate(' + size() / 2 + ',' + size() / 2 + ')'">
         @for (s of slices(); track s.key) {
-          <path [attr.d]="s.path" [attr.fill]="s.color"><title>{{ s.title }}</title></path>
+          <path [attr.d]="s.path" [attr.fill]="s.color"
+                [class.clickable]="s.clickable"
+                [class.selected]="s.key === selected()"
+                (click)="s.clickable && select.emit(s.key)"><title>{{ s.title }}</title></path>
         }
       </g>
     </svg>
@@ -24,7 +29,10 @@ interface Slice {
   styles: [`
     :host { display: inline-block; line-height: 0; }
     path { stroke: #fff; stroke-width: 1.5; transition: opacity .15s; }
-    path:hover { opacity: .85; }
+    path.clickable { cursor: pointer; }
+    path.clickable:hover { opacity: .8; }
+    .has-selection path:not(.selected) { opacity: .35; }
+    path.selected { stroke: #1f2328; stroke-width: 2; }
   `],
 })
 export class PieChartComponent {
@@ -33,6 +41,9 @@ export class PieChartComponent {
   readonly names = input<(key: string) => string>(k => k);
   readonly size = input(180);
   readonly label = input('');
+  /** Key of the highlighted slice, if any. */
+  readonly selected = input<string | null>(null);
+  readonly select = output<string>();
 
   readonly viewBox = computed(() => `0 0 ${this.size()} ${this.size()}`);
 
@@ -45,6 +56,7 @@ export class PieChartComponent {
       path: toPath(a) ?? '',
       color: a.data.color,
       title: `${this.names()(a.data.key)}: ${a.data.procenat.toFixed(1)}%`,
+      clickable: a.data.key !== OTHER_KEY,
     }));
   });
 }

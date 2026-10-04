@@ -1,6 +1,16 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { COUNTRIES, Country, CountryCode } from './countries';
-import { CensusEntity, CensusYear, Comparison, MapMode, Territory, YearData } from './census.model';
+import {
+  CensusEntity, CensusYear, Comparison, MapMode, OTHER_KEY, Territory, Topic, YearData, groupShares
+} from './census.model';
+
+/** How a group changed since the previous census. */
+export interface GroupChange {
+  /** Change of its share, in percentage points (28,7% → 32,9% = +4,2). */
+  share: number;
+  /** Change of its head count, in % (19.906 → 3.662 = −81,6%); null when it was 0 before. */
+  count: number | null;
+}
 
 /** Shared UI state: selected country and census, map mode, hovered / pinned municipality. */
 @Injectable({ providedIn: 'root' })
@@ -86,6 +96,17 @@ export class CensusStore {
     this.focusGroup.update(g => (g === group ? null : group));
   }
 
+  /** Shows one group's share on the map, switching to its topic (pie slice / table row click). */
+  selectGroup(topic: Topic, group: string) {
+    if (group === OTHER_KEY) return; // "Ostali" is a remainder, not a group that can be mapped
+    if (this.mode() === topic && this.focusGroup() === group) {
+      this.focusGroup.set(null);
+      return;
+    }
+    this.setMode(topic);
+    this.focusGroup.set(group);
+  }
+
   togglePin(id: string) {
     this.pinnedId.update(p => (p === id ? null : id));
   }
@@ -131,5 +152,30 @@ export class CensusStore {
     const cmp = this.compare(id);
     if (!now || cmp.status !== 'same') return null;
     return ((now.stanovnika - cmp.entity.stanovnika) / cmp.entity.stanovnika) * 100;
+  }
+
+  /** Change of a group's share since the previous census, in percentage points (null when not comparable). */
+  groupChange(id: string | null, topic: Topic, group: string): GroupChange | null {
+    const now = this.entity(id);
+    const cmp = this.compare(id);
+    if (!now || cmp.status !== 'same' || !this.recorded(this.previous(), topic, group)) return null;
+    const current = groupShares(now, topic).find(s => s.key === group);
+    const previous = groupShares(cmp.entity, topic).find(s => s.key === group);
+    if (!current || !previous) return null;
+    return {
+      share: current.procenat - previous.procenat,
+      count: previous.broj > 0 ? ((current.broj - previous.broj) / previous.broj) * 100 : null,
+    };
+  }
+
+  /**
+   * Whether a census recorded the group at all. Some categories were not offered
+   * in every census (e.g. "Srpskohrvatski" as a mother tongue did not exist in 2003),
+   * so a zero there means "not asked", not "nobody".
+   */
+  recorded(data: YearData | null, topic: Topic, group: string): boolean {
+    if (!data) return false;
+    if (group === OTHER_KEY) return true;
+    return (groupShares(data.census.drzava, topic).find(s => s.key === group)?.broj ?? 0) > 0;
   }
 }

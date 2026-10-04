@@ -1,9 +1,9 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild, computed, effect, inject, signal, untracked } from '@angular/core';
 import * as L from 'leaflet';
-import { CensusStore } from '../census/census.store';
+import { CensusStore, GroupChange } from '../census/census.store';
 import {
-  CHANGE_SCALE, MapMode, NO_DATA_COLOR, POPULATION_SCALE, Scale, TOPICS, Topic, YearData,
-  binIndex, groupShares, groupsFor, isLight, lighten, majority, majorityColor, shareScale
+  CHANGE_SCALE, DENSITY_SCALE, GroupShare, MapMode, NO_DATA_COLOR, POPULATION_SCALE, Scale, Topic, YearData,
+  binIndex, groupShares, groupsFor, isLight, isTopic, lighten, majority, majorityColor, shareScale
 } from '../census/census.model';
 import { I18n } from '../core/i18n.service';
 
@@ -16,7 +16,13 @@ interface LegendItem {
   label: string;
 }
 
-const isTopic = (mode: MapMode): mode is Topic => (TOPICS as string[]).includes(mode);
+/** What the hover card / selection bar shows, depending on the selected tab. */
+type CardBody =
+  | { kind: 'groups'; topic: Topic; groups: GroupShare[] }
+  | { kind: 'focus'; topic: Topic; share: GroupShare; change: GroupChange | null }
+  | { kind: 'population' }
+  | { kind: 'density' }
+  | { kind: 'change' };
 
 @Component({
   selector: 'app-map',
@@ -62,6 +68,7 @@ export class MapComponent implements OnInit, OnDestroy {
       { mode: 'religion' as MapMode, label: this.i18n.t('modeReligion'), disabled: false },
       { mode: 'language' as MapMode, label: this.i18n.t('modeLanguage'), disabled: false },
       { mode: 'population' as MapMode, label: this.i18n.t('modePopulation'), disabled: false },
+      { mode: 'density' as MapMode, label: this.i18n.t('modeDensity'), disabled: false },
       { mode: 'change' as MapMode, label: prev ? this.i18n.t('modeChange', { prev }) : this.i18n.t('change'), disabled: !prev },
     ];
   });
@@ -78,6 +85,9 @@ export class MapComponent implements OnInit, OnDestroy {
     const mode = this.store.mode();
     const focus = this.store.focusGroup();
     if (mode === 'population') return this.scaleItems(POPULATION_SCALE, v => this.i18n.num(v));
+    if (mode === 'density') {
+      return this.scaleItems(DENSITY_SCALE, v => this.i18n.num(v)).map(i => ({ ...i, label: `${i.label} ${this.i18n.t('perKm2')}` }));
+    }
     if (mode === 'change') {
       return [
         ...this.scaleItems(CHANGE_SCALE, v => this.i18n.signedPct(v, 0)),
@@ -91,16 +101,30 @@ export class MapComponent implements OnInit, OnDestroy {
     return null;
   });
 
-  /** Summary for the hover card (desktop) or the selection bar (touch). */
+  /** Hover card (desktop) / selection bar (touch): follows the selected tab and group. */
   readonly summary = computed(() => {
     const id = this.touch ? this.store.pinnedId() : this.store.hoveredId();
     const entity = this.store.entity(id);
     if (!id || !entity) return null;
-    return {
-      entity,
-      rows: TOPICS.map(topic => ({ topic, share: majority(groupShares(entity, topic)) })),
-      change: this.store.change(id),
-    };
+    const mode = this.store.mode();
+    const focus = this.store.focusGroup();
+
+    let body: CardBody;
+    if (isTopic(mode)) {
+      const shares = groupShares(entity, mode);
+      const focused = focus ? shares.find(s => s.key === focus) : undefined;
+      body = focused
+        ? { kind: 'focus', topic: mode, share: focused, change: this.store.groupChange(id, mode, focused.key) }
+        : { kind: 'groups', topic: mode, groups: shares.filter(s => !s.special).slice(0, 3) };
+    } else {
+      body = { kind: mode };
+    }
+
+    const accent =
+      body.kind === 'focus' ? body.share.color
+        : body.kind === 'groups' ? majority(groupShares(entity, body.topic)).color
+          : '#c8102e';
+    return { entity, body, accent, change: this.store.change(id), previous: this.store.compare(id) };
   });
 
   constructor() {
@@ -146,8 +170,8 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // toolbar height, window size and phone rotation all change the map size
     this.resizeObserver = new ResizeObserver(() => {
-      this.map?.invalidateSize();
-      if (!this.userMoved) this.fit();
+      if (this.fitted) this.map?.invalidateSize();
+      if (!this.fitted || !this.userMoved) this.fit();
     });
     this.resizeObserver.observe(this.mapDiv.nativeElement);
   }
@@ -168,6 +192,11 @@ export class MapComponent implements OnInit, OnDestroy {
 
   topicLabel(topic: Topic) {
     return this.i18n.t(topic === 'nationality' ? 'nationality' : topic === 'religion' ? 'religion' : 'motherTongue');
+  }
+
+  /** +4,2% / −81,6% / +137% – no decimals once the change is large. */
+  countChange(value: number): string {
+    return this.i18n.signedPct(value, Math.abs(value) >= 100 ? 0 : 1);
   }
 
   showDetails() {
@@ -203,23 +232,25 @@ export class MapComponent implements OnInit, OnDestroy {
       },
     });
 
-    if (!this.fitted) {
-      // the view must exist before vector layers are added
-      this.fit();
-      this.fitted = true;
-    }
+    // the view should exist before vector layers are added; if the map is still
+    // invisible, the resize observer fits it as soon as it gets a size
+    if (!this.fitted) this.fit();
     this.layer.addTo(this.map);
     this.renderLabels();
   }
 
   private fit() {
     if (!this.map || !this.layer) return;
-    const size = this.map.getSize();
-    if (!size.x || !size.y) return;
+    // Leaflet caches the map size the first time it is asked and cannot refresh it
+    // before the map has a view, so never ask while the container is still 0×0
+    // (page opened in a background tab, layout not settled yet on a phone, …).
+    const el = this.mapDiv.nativeElement;
+    if (!el.clientWidth || !el.clientHeight) return;
     this.fitting = true;
     // extra room for edge labels (Herceg Novi) and the attribution line at the bottom
     this.map.fitBounds(this.layer.getBounds(), { paddingTopLeft: [30, 12], paddingBottomRight: [16, 28], animate: false });
     this.fitting = false;
+    this.fitted = true;
   }
 
   private renderLabels() {
@@ -259,6 +290,7 @@ export class MapComponent implements OnInit, OnDestroy {
     if (!entity) return '';
     const mode = this.store.mode();
     if (mode === 'population') return this.i18n.num(entity.stanovnika);
+    if (mode === 'density') return this.i18n.num(entity.gustina, entity.gustina < 10 ? 1 : 0);
     if (mode === 'change') {
       const change = this.store.change(id);
       return change === null ? '' : this.i18n.signedPct(change);
@@ -298,6 +330,7 @@ export class MapComponent implements OnInit, OnDestroy {
     const mode = this.store.mode();
 
     if (mode === 'population') return POPULATION_SCALE.colors[binIndex(entity.stanovnika, POPULATION_SCALE.breaks)];
+    if (mode === 'density') return DENSITY_SCALE.colors[binIndex(entity.gustina, DENSITY_SCALE.breaks)];
     if (mode === 'change') {
       const change = this.store.change(id);
       return change === null ? NO_DATA_COLOR : CHANGE_SCALE.colors[binIndex(change, CHANGE_SCALE.breaks)];

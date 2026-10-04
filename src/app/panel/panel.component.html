@@ -61,49 +61,103 @@
   }
 
   @for (view of topics(); track view.topic) {
-    <section class="card">
+    <section class="card" [attr.data-topic]="view.topic">
       <h3>{{ topicTitle(view.topic) }}</h3>
 
       <div class="pies" [class.single]="!view.previous">
         @if (view.previous) {
           <figure>
-            <app-pie-chart [shares]="view.previous" [names]="groupName" [size]="140" />
-            <figcaption>{{ store.previousYear() }}.</figcaption>
+            <app-pie-chart [shares]="view.previous" [names]="groupName" [size]="140"
+                           [selected]="selectedKey(view.topic)" (select)="selectGroup(view.topic, $event)" />
+            <figcaption><span class="year-pill">{{ store.previousYear() }}.</span></figcaption>
           </figure>
-          <span class="arrow" aria-hidden="true">→</span>
         }
         <figure>
-          <app-pie-chart [shares]="view.current" [names]="groupName" [size]="view.previous ? 140 : 170" />
-          <figcaption><strong>{{ store.year() }}.</strong></figcaption>
+          <app-pie-chart [shares]="view.current" [names]="groupName" [size]="view.previous ? 140 : 170"
+                         [selected]="selectedKey(view.topic)" (select)="selectGroup(view.topic, $event)" />
+          <figcaption><span class="year-pill current">{{ store.year() }}.</span></figcaption>
         </figure>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            @if (view.previous) { <th>{{ store.previousYear() }}.</th> }
-            <th>{{ store.year() }}.</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (row of view.rows; track row.key) {
+      <div class="table-wrap">
+        <table [class.compact]="compact()">
+          <thead>
             <tr>
-              <td><i class="swatch" [style.background]="row.color"></i>{{ i18n.name(row.key) }}</td>
+              <th rowspan="2"></th>
+              @if (view.previous) { <th [attr.colspan]="compact() ? 1 : 2" class="year">{{ store.previousYear() }}.</th> }
+              <th [attr.colspan]="compact() ? 1 : 2" class="year current">{{ store.year() }}.</th>
               @if (view.previous) {
-                <td class="num">
-                  @if (row.previous) {
-                    {{ i18n.pct(row.previous.procenat) }} <small>{{ i18n.num(row.previous.broj) }}</small>
-                  }
-                </td>
+                <th colspan="2" class="year delta-col">
+                  <button type="button" class="info-toggle" (click)="showChangeHelp.set(!showChangeHelp())"
+                          [attr.aria-expanded]="showChangeHelp()" [attr.aria-label]="i18n.t('changeHelpToggle')">
+                    {{ i18n.t('colChange') }}
+                    <svg class="info-icon" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+                      <circle cx="8" cy="8" r="7.25" />
+                      <circle class="glyph" cx="8" cy="4.9" r="1.05" />
+                      <rect class="glyph" x="7.1" y="6.9" width="1.8" height="4.9" rx="0.9" />
+                    </svg>
+                  </button>
+                </th>
               }
-              <td class="num">
-                <strong>{{ i18n.pct(row.current.procenat) }}</strong> <small>{{ i18n.num(row.current.broj) }}</small>
-              </td>
             </tr>
-          }
-        </tbody>
-      </table>
+            <tr class="sub">
+              @if (view.previous) { <th>%</th>@if (!compact()) { <th>{{ i18n.t('colCount') }}</th> } }
+              <th>%</th>@if (!compact()) { <th>{{ i18n.t('colCount') }}</th> }
+              @if (view.previous) {
+                <th class="delta-col">{{ i18n.t('colShare') }}</th>
+                <th>{{ i18n.t('colCount') }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of view.rows; track row.key) {
+              <tr [class.selected]="row.key === selectedKey(view.topic)"
+                  [class.clickable]="row.clickable"
+                  (click)="row.clickable && selectGroup(view.topic, row.key)">
+                <td class="name"><span class="name-inner"><i class="swatch" [style.background]="row.color"></i><span>{{ i18n.name(row.key) }}</span></span></td>
+                @if (view.previous) {
+                  @if (row.previousRecorded) {
+                    <td class="num prev muted-num">{{ row.previous ? i18n.pct(row.previous.procenat) : '' }}</td>
+                    @if (!compact()) { <td class="num prev count">{{ row.previous ? i18n.num(row.previous.broj) : '' }}</td> }
+                  } @else {
+                    <td class="num prev na" [attr.colspan]="compact() ? 1 : 2">–</td>
+                  }
+                }
+                @if (row.currentRecorded) {
+                  <td class="num"><strong>{{ i18n.pct(row.current.procenat) }}</strong></td>
+                  @if (!compact()) { <td class="num count">{{ i18n.num(row.current.broj) }}</td> }
+                } @else {
+                  <td class="num na" [attr.colspan]="compact() ? 1 : 2">–</td>
+                }
+                @if (view.previous) {
+                  <td class="num delta-col">
+                    @if (row.delta !== null) {
+                      <span [class.up]="row.delta >= 0.05" [class.down]="row.delta <= -0.05">{{ i18n.signed(row.delta) }}</span>
+                    } @else {
+                      <span class="na">–</span>
+                    }
+                  </td>
+                  <td class="num count-change">
+                    @if (row.deltaCount !== null) {
+                      <span [class.up]="row.deltaCount >= 0.05" [class.down]="row.deltaCount <= -0.05">{{ countChange(row.deltaCount) }}</span>
+                    } @else {
+                      <span class="na">–</span>
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (view.previous && showChangeHelp()) {
+        <div class="change-help">
+          <p><strong>{{ i18n.t('colShare') }}</strong> – {{ i18n.t('ppHint') }}</p>
+          <p><strong>{{ i18n.t('colCount') }}</strong> – {{ i18n.t('countChangeHint') }}</p>
+          <p><strong>–</strong> {{ i18n.t('changeHelpNa') }}</p>
+        </div>
+      }
     </section>
   }
 
