@@ -28,15 +28,15 @@ npm run data:build   # ponovo generiše public/data/ iz izvora
 Adresa uvijek opisuje ono što je prikazano, pa se svaki prikaz može podijeliti:
 
 ```
-/<država>/<godina>/<prikaz>[/<opština>][?udio=<grupa>]
-/me/2003/jezik/plav?udio=bosnjacki
-/me/2023/promjena
+/<država>/<godina>/<prikaz>[/<opština>]/[?udio=<grupa>]
+/me/2003/jezik/plav/?udio=bosnjacki
+/me/2023/promjena/
 ```
 
-Prikazi: `nacionalnost`, `vjera`, `jezik`, `stanovnistvo`, `promjena`.
-Pošto su to putanje, hosting mora sve nepoznate adrese vraćati na aplikaciju:
-na GitHub Pages to radi `404.html` (kopija `index.html`, pravi je workflow),
-a za Netlify i Cloudflare Pages `public/_redirects`.
+Prikazi: `nacionalnost`, `vjera`, `jezik`, `stanovnistvo`, `gustina`, `promjena`.
+Za svaki od tih linkova postoji prava stranica (vidi „Pretraživači i statistika" niže).
+Sve ostale adrese otvaraju aplikaciju preko `404.html` (kopija `index.html`, pravi je workflow);
+za Netlify i Cloudflare Pages isto radi `public/_redirects`.
 
 ## Objavljivanje (GitHub Pages)
 

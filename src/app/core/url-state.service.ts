@@ -17,8 +17,11 @@ const COUNT_AFTER_MS = 1500;
 /**
  * Keeps the address bar in sync with what is shown, so every view can be shared:
  *
- *   <base>/<country>/<year>/<view>[/<municipality>][?udio=<group>]
- *   e.g. /me/2003/jezik/pljevlja, /me/2023/nacionalnost?udio=srbi
+ *   <base>/<country>/<year>/<view>[/<municipality>]/[?udio=<group>]
+ *   e.g. /me/2003/jezik/pljevlja/, /me/2023/nacionalnost/?udio=srbi
+ *
+ * The trailing slash matches the pages scripts/build-pages.js writes (dir/index.html),
+ * which GitHub Pages serves directly instead of redirecting.
  *
  * <base> is the <base href> of the build: "/" on an own domain,
  * "/popisna-mapa-cg/" on GitHub Pages.
@@ -153,6 +156,6 @@ export class UrlState {
     const name = pinned ? this.store.current()?.census.opstine[pinned]?.naziv : null;
     if (name) parts.push(slugify(name));
     const focus = this.store.focusGroup();
-    return BASE + parts.join('/') + (focus ? `?udio=${slugify(focus)}` : '');
+    return BASE + parts.join('/') + '/' + (focus ? `?udio=${slugify(focus)}` : '');
   }
 }

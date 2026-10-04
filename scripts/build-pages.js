@@ -102,7 +102,8 @@ for (const year of years) {
     for (const [id, entity] of places) {
       const place = id ? entity.naziv : COUNTRY.name;
       const parts = [COUNTRY.code, String(year), mode.slug, ...(id ? [slugify(entity.naziv)] : [])];
-      const url = `${SITE}/${parts.join('/')}`;
+      // trailing slash: GitHub Pages serves dir/index.html there and 301-redirects the slash-less form
+      const url = `${SITE}/${parts.join('/')}/`;
       const title = `${place} – ${mode.label}, popis ${year} · Popisna mapa`;
       const description = describe(mode, entity, place, year, previousOf(id, year));
       const dir = path.join(DIST, ...parts);
