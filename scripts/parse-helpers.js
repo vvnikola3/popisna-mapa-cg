@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { loadRegistry, holderIn } = require('./registry');
+const { loadRegistry, holderIn, territoryYear } = require('./registry');
 
 /** "179 505" -> 179505, "28,78" -> 28.78, "z"/"-" -> null */
 const num = s => (s === 'z' || s === '-' ? null : +s.replace(/ /g, '').replace(',', '.'));
@@ -47,11 +47,12 @@ function splitsSummingToHead(tokens, count) {
 function officialAreas(country, year) {
   const official = JSON.parse(fs.readFileSync(path.join(__dirname, 'sources', country, 'povrsine.json'), 'utf8'));
   const registry = loadRegistry(country);
+  const territory = territoryYear(registry, year);
   const byId = {};
   for (const unit of registry.opstine) {
     const area = official.opstine[unit.id];
     if (area == null) throw new Error(`No official area for ${unit.id}`);
-    const holder = holderIn(registry, unit.id, year);
+    const holder = holderIn(registry, unit.id, territory);
     byId[holder] = (byId[holder] ?? 0) + area;
   }
   return { byId, total: official.drzava };

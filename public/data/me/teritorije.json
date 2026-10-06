@@ -1,10 +1,15 @@
 {
   "drzava": { "id": "ME", "naziv": "Crna Gora" },
-  "napomena": "Opštine bez polja 'osnovana' postoje u svim popisima za koje imamo podatke (od 2003). 'izdvojenaIz' je opština čiji je dio bila prije osnivanja.",
+  "napomena": "Opštine bez polja 'osnovana' postoje u svim popisima. 'izdvojenaIz' je opština čiji je dio bila prije osnivanja (za Andrijevicu: ponovo formirana između popisa 1981. i 1991.). 'raniji' su nazivi u vrijeme ranijih popisa.",
+  "teritorijaPopisa": {
+    "napomena": "Popisi čiji su podaci iskazani prema kasnijim granicama: MONSTAT, Popis 2003, Knjiga 9 daje broj stanovnika 1948. i 1953. preračunat na opštine iz 2003.",
+    "1948": 2003,
+    "1953": 2003
+  },
   "opstine": [
-    { "id": "ME01", "naziv": "Andrijevica" },
+    { "id": "ME01", "naziv": "Andrijevica", "osnovana": 1991, "izdvojenaIz": "ME03" },
     { "id": "ME02", "naziv": "Bar" },
-    { "id": "ME03", "naziv": "Berane" },
+    { "id": "ME03", "naziv": "Berane", "raniji": [{ "od": 1949, "do": 1991, "naziv": "Ivangrad" }] },
     { "id": "ME04", "naziv": "Bijelo Polje" },
     { "id": "ME05", "naziv": "Budva" },
     { "id": "ME06", "naziv": "Cetinje" },
@@ -17,7 +22,7 @@
     { "id": "ME13", "naziv": "Plav" },
     { "id": "ME14", "naziv": "Pljevlja" },
     { "id": "ME15", "naziv": "Plužine" },
-    { "id": "ME16", "naziv": "Podgorica" },
+    { "id": "ME16", "naziv": "Podgorica", "raniji": [{ "od": 1946, "do": 1991, "naziv": "Titograd" }] },
     { "id": "ME17", "naziv": "Rožaje" },
     { "id": "ME18", "naziv": "Šavnik" },
     { "id": "ME19", "naziv": "Tivat" },

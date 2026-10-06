@@ -9,7 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { CENSUS_YEARS, loadRegistry, holderIn } = require('./registry');
+const { CENSUS_YEARS, loadRegistry, holderIn, territoryYear } = require('./registry');
 
 const SITE = 'https://popisi.org';
 const DIST = path.resolve(process.argv[2] ?? path.join(__dirname, '..', 'dist', 'popisna-mapa-cg', 'browser'));
@@ -40,12 +40,13 @@ const isResidual = name => /^(Ne želi|Neizjašnj|Nepoznato|Ostal|Maternji$|Regi
 
 function describe(mode, entity, place, year, previous) {
   if (mode.list) {
-    const top = entity[mode.list].filter(s => !isResidual(s.naziv)).slice(0, 3)
+    const top = [...entity[mode.list]].sort((a, b) => b.broj - a.broj).filter(s => !isResidual(s.naziv)).slice(0, 3)
       .map(s => `${s.naziv} ${num(s.procenat, 1)}%`).join(', ');
     return `${capitalize(mode.label)} – ${place}, popis ${year}: ${top}. Interaktivna mapa po opštinama i poređenje sa ranijim popisima.`;
   }
   if (mode.slug === 'stanovnistvo') {
-    return `${place} ima ${num(entity.stanovnika)} stanovnika prema popisu ${year} (muškarci ${num(entity.muskarci)}, žene ${num(entity.zene)}). Interaktivna popisna mapa po opštinama.`;
+    const sexes = entity.muskarci === null ? '' : ` (muškarci ${num(entity.muskarci)}, žene ${num(entity.zene)})`;
+    return `${place}: ${num(entity.stanovnika)} stanovnika prema popisu ${year}${sexes}. Interaktivna popisna mapa po opštinama.`;
   }
   if (mode.slug === 'gustina') {
     return `Gustina naseljenosti – ${place}, popis ${year}: ${num(entity.gustina, 1)} stanovnika po km² (${num(entity.stanovnika)} stanovnika). Interaktivna popisna mapa po opštinama.`;
@@ -81,16 +82,18 @@ const registry = loadRegistry(COUNTRY.code);
 const years = CENSUS_YEARS[COUNTRY.code];
 const census = Object.fromEntries(years.map(y => [y, JSON.parse(fs.readFileSync(path.join(DATA, COUNTRY.code, `popis-${y}.json`), 'utf8'))]));
 
+/** Today's municipalities whose territory belonged to `id` in a census. */
+const coverage = (id, year) =>
+  registry.opstine.filter(u => holderIn(registry, u.id, territoryYear(registry, year)) === id).map(u => u.id).sort().join();
+
 /** Same territory in the previous census, or null when borders changed (see CensusStore.compare). */
 function previousOf(id, year) {
   const prevYear = years[years.indexOf(year) - 1];
   if (!prevYear) return null;
   const prev = census[prevYear];
   if (!id) return { year: prevYear, entity: prev.drzava };
-  const unit = registry.opstine.find(u => u.id === id);
-  if (unit?.osnovana && unit.osnovana > prevYear) return null;
-  const split = registry.opstine.some(u => u.osnovana > prevYear && u.osnovana <= year && holderIn(registry, u.id, prevYear) === id);
-  return split || !prev.opstine[id] ? null : { year: prevYear, entity: prev.opstine[id] };
+  if (!prev.opstine[id] || coverage(id, prevYear) !== coverage(id, year)) return null;
+  return { year: prevYear, entity: prev.opstine[id] };
 }
 
 const pages = [];
@@ -99,8 +102,9 @@ for (const year of years) {
   const places = [[null, data.drzava], ...Object.entries(data.opstine)];
   for (const mode of MODES) {
     if (mode.needsPrevious && years.indexOf(year) === 0) continue;
+    if (mode.list && !data.drzava[mode.list].length) continue; // not asked in this census
     for (const [id, entity] of places) {
-      const place = id ? entity.naziv : COUNTRY.name;
+      const place = !id ? COUNTRY.name : entity.danas ? `${entity.naziv} (danas ${entity.danas})` : entity.naziv;
       const parts = [COUNTRY.code, String(year), mode.slug, ...(id ? [slugify(entity.naziv)] : [])];
       // trailing slash: GitHub Pages serves dir/index.html there and 301-redirects the slash-less form
       const url = `${SITE}/${parts.join('/')}/`;

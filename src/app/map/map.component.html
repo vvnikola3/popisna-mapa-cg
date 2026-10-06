@@ -26,6 +26,7 @@
               [attr.aria-checked]="store.mode() === m.mode"
               [class.active]="store.mode() === m.mode"
               [disabled]="m.disabled"
+              [attr.title]="m.title || null"
               (click)="store.setMode(m.mode)">{{ m.label }}</button>
     }
   </div>
@@ -81,7 +82,7 @@
     @if (touch) {
       <div class="selection-bar" [style.--accent]="s.accent">
         <div class="sb-main">
-          <strong>{{ i18n.name(s.entity.naziv) }}</strong>
+          <strong>{{ i18n.name(s.entity.naziv) }}@if (s.entity.danas) { <small>({{ i18n.t('today', { name: i18n.name(s.entity.danas) }) }})</small> }</strong>
           <span>{{ i18n.num(s.entity.stanovnika) }} {{ i18n.t('population').toLowerCase() }}</span>
           <span class="sb-line">
             @switch (s.body.kind) {
@@ -111,6 +112,7 @@
            [style.top.px]="cardPos().y"
            [style.--accent]="s.accent">
         <div class="hc-name">{{ i18n.name(s.entity.naziv) }}</div>
+        @if (s.entity.danas) { <div class="hc-today">{{ i18n.t('today', { name: i18n.name(s.entity.danas) }) }}</div> }
         <div class="hc-pop">
           {{ i18n.num(s.entity.stanovnika) }} <small>{{ i18n.t('population').toLowerCase() }}</small>
         </div>

@@ -1,0 +1,26 @@
+{
+  "napomena": "Opštine iz popisa 1953 (rzs-1953-knjiga-nacionalnost-cg.txt) raspoređene po opštinama iz 2003. Neke su kasnije podijeljene po naseljima (npr. Komani, Murino, Drobnjaci, Krtoli), pa je raspored približan – build-census-historical.js poredi zbirove sa MONSTAT-ovom Knjigom 9.",
+  "opstine": {
+    "ME02": ["Barska", "Crmnička", "Krajinska", "Mrkojevićka", "Spičanska"],
+    "ME03": ["Budimska", "Ivangrad", "Lubnička", "Manastirska", "Petnjička"],
+    "ME04": ["Bjelopoljska", "Bistrička", "Koritska", "Limska", "Lozansko-Zatonska", "Pavinopoljska", "Ravnoriječka", "Tomaševska"],
+    "ME05": ["Paštrovska", "Budvanska"],
+    "ME06": ["Cetinjska", "Cucka", "Čevska", "Njeguško-Ćeklićka", "Riječka", "Sokolska"],
+    "ME07": ["Danilovgradska", "Slapska", "Spuška", "Zagaračko-Komanska"],
+    "ME08": ["Hercegnovska"],
+    "ME09": ["Donjomoračka", "Gornjomoračka", "Kolašinska", "Mateševska", "Rovačka"],
+    "ME10": ["Grbaljska", "Kotorska", "Risanska"],
+    "ME11": ["Mojkovačka", "Poljska"],
+    "ME12": ["Banjskovučedolska", "Golijska", "Gornjepoljska", "Grahovska", "Lukovska", "Moštanička", "Nikšićka", "Pješivačka", "Župska"],
+    "ME13": ["Gusinjska", "Murinska", "Plavska"],
+    "ME14": ["Bobovska", "Boljanićka", "Breznička", "Bukovička", "Kosanička", "Maočka", "Meljačka", "Pljevaljska", "Zabrdska"],
+    "ME15": ["Planinopivska", "Župopivska"],
+    "ME16": ["GRAD TITOGRAD", "Biočka", "Kučka", "Lješanska", "Lješkopoljska", "Ljevorečka", "Piperska", "Tuška", "Zatrijebačka", "Zetska"],
+    "ME17": ["Biševska", "Rožajska"],
+    "ME18": ["Drobnjačka", "Uskočka"],
+    "ME19": ["Tivatska"],
+    "ME20": ["Ulcinjska", "Vladimirska"],
+    "ME21": ["Jezerska", "Šaranska"],
+    "ME01": ["Andrijevička", "Trepčanska"]
+  }
+}

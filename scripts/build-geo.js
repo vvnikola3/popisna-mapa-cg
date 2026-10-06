@@ -13,7 +13,7 @@ const fs = require('fs');
 const path = require('path');
 const turf = require('@turf/turf');
 const polylabel = require('polylabel');
-const { CENSUS_YEARS, loadRegistry, holderIn } = require('./registry');
+const { CENSUS_YEARS, loadRegistry, holderIn, nameIn, territoryYear } = require('./registry');
 
 const COUNTRY = 'me';
 const SRC = path.join(__dirname, 'sources', COUNTRY);
@@ -79,7 +79,8 @@ fs.mkdirSync(OUT, { recursive: true });
 
 for (const year of CENSUS_YEARS[COUNTRY]) {
   const groups = {};
-  for (const f of current) (groups[holderIn(registry, f.properties.id, year)] ??= []).push(f);
+  const territory = territoryYear(registry, year);
+  for (const f of current) (groups[holderIn(registry, f.properties.id, territory)] ??= []).push(f);
 
   const features = Object.entries(groups)
     .map(([id, parts]) => {
@@ -87,7 +88,7 @@ for (const year of CENSUS_YEARS[COUNTRY]) {
         ? parts[0].geometry
         : clean(turf.union(turf.featureCollection(parts.map(p => turf.feature(p.geometry)))));
       const rounded = round(geometry);
-      return { type: 'Feature', geometry: rounded, properties: { id, name: names[id], label: labelPoint(rounded) } };
+      return { type: 'Feature', geometry: rounded, properties: { id, name: nameIn(registry, id, year), label: labelPoint(rounded) } };
     })
     .sort((a, b) => a.properties.id.localeCompare(b.properties.id));
 

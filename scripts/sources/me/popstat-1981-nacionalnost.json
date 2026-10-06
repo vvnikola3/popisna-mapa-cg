@@ -1,0 +1,365 @@
+{
+ "izvor": "pop-stat.mashke.org (T. Bespyatov), http://pop-stat.mashke.org/yugoslavia-ethnic1981.htm",
+ "napomena": "Prepisano iz publikacija Saveznog zavoda za statistiku; ukupni broj stanovnika po opštinama provjeren prema MONSTAT, Popis 2003, Knjiga 9.",
+ "godina": 1981,
+ "tema": "nacionalnost",
+ "jedinice": [
+  {
+   "naziv": "SR CRNA GORA",
+   "ukupno": 584310,
+   "kategorije": {
+    "SRBI": 19407,
+    "HRVATI": 6904,
+    "MUSLIMANI": 78080,
+    "SLOVENCI": 564,
+    "MAKEDONCI": 875,
+    "CRNOGORCI": 400488,
+    "ALBANCI": 37735,
+    "MAĐARI": 238,
+    "ROMI": 1471,
+    "JUGOSLOVENI": 33146,
+    "OSTALI": 5402
+   }
+  },
+  {
+   "naziv": "BAR",
+   "ukupno": 32535,
+   "kategorije": {
+    "SRBI": 1263,
+    "HRVATI": 231,
+    "MUSLIMANI": 2242,
+    "SLOVENCI": 18,
+    "MAKEDONCI": 44,
+    "CRNOGORCI": 20899,
+    "ALBANCI": 4109,
+    "MAĐARI": 18,
+    "ROMI": 20,
+    "JUGOSLOVENI": 3054,
+    "OSTALI": 637
+   }
+  },
+  {
+   "naziv": "BIJELO POLJE",
+   "ukupno": 55634,
+   "kategorije": {
+    "SRBI": 949,
+    "HRVATI": 39,
+    "MUSLIMANI": 20840,
+    "SLOVENCI": 15,
+    "MAKEDONCI": 36,
+    "CRNOGORCI": 32172,
+    "ALBANCI": 55,
+    "MAĐARI": 5,
+    "ROMI": 64,
+    "JUGOSLOVENI": 1087,
+    "OSTALI": 372
+   }
+  },
+  {
+   "naziv": "BUDVA",
+   "ukupno": 8632,
+   "kategorije": {
+    "SRBI": 899,
+    "HRVATI": 121,
+    "MUSLIMANI": 70,
+    "SLOVENCI": 10,
+    "MAKEDONCI": 23,
+    "CRNOGORCI": 6022,
+    "ALBANCI": 37,
+    "MAĐARI": 17,
+    "ROMI": 6,
+    "JUGOSLOVENI": 1272,
+    "OSTALI": 155
+   }
+  },
+  {
+   "naziv": "CETINJE",
+   "ukupno": 20213,
+   "kategorije": {
+    "SRBI": 238,
+    "HRVATI": 58,
+    "MUSLIMANI": 112,
+    "SLOVENCI": 22,
+    "MAKEDONCI": 23,
+    "CRNOGORCI": 19249,
+    "ALBANCI": 64,
+    "MAĐARI": 9,
+    "ROMI": 75,
+    "JUGOSLOVENI": 249,
+    "OSTALI": 114
+   }
+  },
+  {
+   "naziv": "DANILOVGRAD",
+   "ukupno": 14769,
+   "kategorije": {
+    "SRBI": 281,
+    "HRVATI": 53,
+    "MUSLIMANI": 49,
+    "SLOVENCI": 6,
+    "MAKEDONCI": 10,
+    "CRNOGORCI": 13878,
+    "ALBANCI": 39,
+    "MAĐARI": 4,
+    "ROMI": 40,
+    "JUGOSLOVENI": 315,
+    "OSTALI": 94
+   }
+  },
+  {
+   "naziv": "HERCEG NOVI",
+   "ukupno": 23258,
+   "kategorije": {
+    "SRBI": 3844,
+    "HRVATI": 702,
+    "MUSLIMANI": 152,
+    "SLOVENCI": 95,
+    "MAKEDONCI": 97,
+    "CRNOGORCI": 9877,
+    "ALBANCI": 83,
+    "MAĐARI": 37,
+    "ROMI": 19,
+    "JUGOSLOVENI": 8006,
+    "OSTALI": 346
+   }
+  },
+  {
+   "naziv": "IVANGRAD",
+   "ukupno": 49772,
+   "kategorije": {
+    "SRBI": 847,
+    "HRVATI": 86,
+    "MUSLIMANI": 12383,
+    "SLOVENCI": 20,
+    "MAKEDONCI": 47,
+    "CRNOGORCI": 34748,
+    "ALBANCI": 35,
+    "MAĐARI": 3,
+    "ROMI": 71,
+    "JUGOSLOVENI": 1099,
+    "OSTALI": 433
+   }
+  },
+  {
+   "naziv": "KOLAŠIN",
+   "ukupno": 12656,
+   "kategorije": {
+    "SRBI": 123,
+    "HRVATI": 17,
+    "MUSLIMANI": 31,
+    "SLOVENCI": 8,
+    "MAKEDONCI": 10,
+    "CRNOGORCI": 12267,
+    "ALBANCI": 0,
+    "MAĐARI": 0,
+    "ROMI": 0,
+    "JUGOSLOVENI": 135,
+    "OSTALI": 65
+   }
+  },
+  {
+   "naziv": "KOTOR",
+   "ukupno": 20455,
+   "kategorije": {
+    "SRBI": 1703,
+    "HRVATI": 1644,
+    "MUSLIMANI": 72,
+    "SLOVENCI": 46,
+    "MAKEDONCI": 38,
+    "CRNOGORCI": 11205,
+    "ALBANCI": 59,
+    "MAĐARI": 43,
+    "ROMI": 0,
+    "JUGOSLOVENI": 5271,
+    "OSTALI": 374
+   }
+  },
+  {
+   "naziv": "MOJKOVAC",
+   "ukupno": 10753,
+   "kategorije": {
+    "SRBI": 152,
+    "HRVATI": 22,
+    "MUSLIMANI": 61,
+    "SLOVENCI": 7,
+    "MAKEDONCI": 5,
+    "CRNOGORCI": 10326,
+    "ALBANCI": 15,
+    "MAĐARI": 0,
+    "ROMI": 26,
+    "JUGOSLOVENI": 102,
+    "OSTALI": 37
+   }
+  },
+  {
+   "naziv": "NIKŠIĆ",
+   "ukupno": 72299,
+   "kategorije": {
+    "SRBI": 1287,
+    "HRVATI": 201,
+    "MUSLIMANI": 1263,
+    "SLOVENCI": 58,
+    "MAKEDONCI": 76,
+    "CRNOGORCI": 66710,
+    "ALBANCI": 410,
+    "MAĐARI": 23,
+    "ROMI": 113,
+    "JUGOSLOVENI": 1786,
+    "OSTALI": 372
+   }
+  },
+  {
+   "naziv": "PLAV",
+   "ukupno": 19560,
+   "kategorije": {
+    "SRBI": 90,
+    "HRVATI": 20,
+    "MUSLIMANI": 10153,
+    "SLOVENCI": 8,
+    "MAKEDONCI": 8,
+    "CRNOGORCI": 4583,
+    "ALBANCI": 4036,
+    "MAĐARI": 0,
+    "ROMI": 0,
+    "JUGOSLOVENI": 397,
+    "OSTALI": 265
+   }
+  },
+  {
+   "naziv": "PLJEVLJA",
+   "ukupno": 43316,
+   "kategorije": {
+    "SRBI": 2296,
+    "HRVATI": 54,
+    "MUSLIMANI": 6967,
+    "SLOVENCI": 24,
+    "MAKEDONCI": 35,
+    "CRNOGORCI": 32323,
+    "ALBANCI": 16,
+    "MAĐARI": 1,
+    "ROMI": 0,
+    "JUGOSLOVENI": 1384,
+    "OSTALI": 216
+   }
+  },
+  {
+   "naziv": "PLUŽINE",
+   "ukupno": 6254,
+   "kategorije": {
+    "SRBI": 65,
+    "HRVATI": 9,
+    "MUSLIMANI": 2,
+    "SLOVENCI": 0,
+    "MAKEDONCI": 2,
+    "CRNOGORCI": 6108,
+    "ALBANCI": 0,
+    "MAĐARI": 0,
+    "ROMI": 0,
+    "JUGOSLOVENI": 27,
+    "OSTALI": 41
+   }
+  },
+  {
+   "naziv": "ROŽAJ",
+   "ukupno": 20227,
+   "kategorije": {
+    "SRBI": 159,
+    "HRVATI": 8,
+    "MUSLIMANI": 16975,
+    "SLOVENCI": 0,
+    "MAKEDONCI": 9,
+    "CRNOGORCI": 1900,
+    "ALBANCI": 863,
+    "MAĐARI": 1,
+    "ROMI": 0,
+    "JUGOSLOVENI": 144,
+    "OSTALI": 168
+   }
+  },
+  {
+   "naziv": "ŠAVNIK",
+   "ukupno": 5569,
+   "kategorije": {
+    "SRBI": 36,
+    "HRVATI": 15,
+    "MUSLIMANI": 8,
+    "SLOVENCI": 0,
+    "MAKEDONCI": 0,
+    "CRNOGORCI": 5432,
+    "ALBANCI": 0,
+    "MAĐARI": 1,
+    "ROMI": 0,
+    "JUGOSLOVENI": 36,
+    "OSTALI": 41
+   }
+  },
+  {
+   "naziv": "TITOGRAD",
+   "ukupno": 132290,
+   "kategorije": {
+    "SRBI": 4060,
+    "HRVATI": 686,
+    "MUSLIMANI": 5948,
+    "SLOVENCI": 156,
+    "MAKEDONCI": 351,
+    "CRNOGORCI": 101482,
+    "ALBANCI": 12122,
+    "MAĐARI": 56,
+    "ROMI": 1011,
+    "JUGOSLOVENI": 5192,
+    "OSTALI": 1226
+   }
+  },
+  {
+   "naziv": "TIVAT",
+   "ukupno": 9315,
+   "kategorije": {
+    "SRBI": 850,
+    "HRVATI": 2876,
+    "MUSLIMANI": 41,
+    "SLOVENCI": 59,
+    "MAKEDONCI": 39,
+    "CRNOGORCI": 2831,
+    "ALBANCI": 129,
+    "MAĐARI": 16,
+    "ROMI": 0,
+    "JUGOSLOVENI": 2384,
+    "OSTALI": 90
+   }
+  },
+  {
+   "naziv": "ULCINJ",
+   "ukupno": 21576,
+   "kategorije": {
+    "SRBI": 241,
+    "HRVATI": 61,
+    "MUSLIMANI": 710,
+    "SLOVENCI": 11,
+    "MAKEDONCI": 22,
+    "CRNOGORCI": 3346,
+    "ALBANCI": 15663,
+    "MAĐARI": 4,
+    "ROMI": 26,
+    "JUGOSLOVENI": 1150,
+    "OSTALI": 342
+   }
+  },
+  {
+   "naziv": "ŽABLJAK",
+   "ukupno": 5227,
+   "kategorije": {
+    "SRBI": 24,
+    "HRVATI": 1,
+    "MUSLIMANI": 1,
+    "SLOVENCI": 1,
+    "MAKEDONCI": 0,
+    "CRNOGORCI": 5130,
+    "ALBANCI": 0,
+    "MAĐARI": 0,
+    "ROMI": 0,
+    "JUGOSLOVENI": 56,
+    "OSTALI": 14
+   }
+  }
+ ]
+}

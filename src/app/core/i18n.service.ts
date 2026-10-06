@@ -53,6 +53,12 @@ const ME = {
   changedBorders: 'Granice promijenjene od {prev}. – tada je obuhvatala i: {list}.',
   createdAfter: 'Opština nije postojala {prev}. – bila je dio opštine {parent}.',
   noPrevious: 'Nema ranijeg popisa za poređenje.',
+  changedBordersNow: 'Granice promijenjene od {prev}. – sada obuhvata i: {list}.',
+  today: 'danas {name}',
+  topicUnavailable: 'Podaci po opštinama za ovaj popis još nisu pronađeni',
+  topicNotAsked: 'Ovo pitanje nije postojalo u popisu {year}.',
+  onlyPopulation: 'Za ovaj popis po opštinama postoji samo broj stanovnika.',
+  censusNote: 'Napomena',
   pinned: 'Izabrano',
   unpin: 'Poništi izbor',
   hint: 'Pređi mišem preko opštine, klikom je izabereš.',
@@ -125,6 +131,12 @@ const EN: Record<Key, string> = {
   changedBorders: 'Borders changed since {prev} – it then also included: {list}.',
   createdAfter: 'The municipality did not exist in {prev} – it was part of {parent}.',
   noPrevious: 'No earlier census to compare with.',
+  changedBordersNow: 'Borders changed since {prev} – it now also includes: {list}.',
+  today: 'today {name}',
+  topicUnavailable: 'Municipal data for this census has not been found yet',
+  topicNotAsked: 'The {year} census did not ask this question.',
+  onlyPopulation: 'For this census only population figures exist by municipality.',
+  censusNote: 'Note',
   pinned: 'Selected',
   unpin: 'Clear selection',
   hint: 'Hover over a municipality, click to select it.',
@@ -159,6 +171,7 @@ const NAMES_EN: Record<string, string> = {
   Albanci: 'Albanians',
   Muslimani: 'Muslims',
   Hrvati: 'Croats',
+  Jugosloveni: 'Yugoslavs',
   Ostali: 'Others',
   Neizjašnjeni: 'Undeclared',
   Pravoslavna: 'Orthodox',
@@ -177,6 +190,16 @@ const NAMES_EN: Record<string, string> = {
   'Bosna i Hercegovina': 'Bosnia and Herzegovina',
   Hrvatska: 'Croatia',
   'Sjeverna Makedonija': 'North Macedonia',
+};
+
+/** English versions of the per-census notes in popis-<year>.json (keyed by country and year). */
+const CENSUS_NOTES_EN: Record<string, string> = {
+  'me-1948': 'Population figures recalculated to the 2003 municipal borders (MONSTAT, Census 2003, Book 9). Ethnic composition for this census exists only by the districts (srez) of the time, so it is not shown.',
+  'me-1953': 'Population figures recalculated to the 2003 municipal borders (MONSTAT, Census 2003, Book 9). The ethnic composition is an estimate: it was published for the smaller municipalities of the time, which are summed here into the 2003 municipalities and scaled to the official population (exact for Bar, Bijelo Polje, Budva, Kolašin, Mojkovac, Pljevlja, Plužine, Rožaje and Ulcinj). In 1953 Muslims could not declare themselves as a separate nation – they were recorded as Montenegrins, Serbs or “Yugoslavs – undecided”.',
+  'me-1961': 'Andrijevica was part of the municipality of Ivangrad (today Berane). “Muslims” were recorded in 1961 as “Muslims in the ethnic sense”. For Titograd, MONSTAT’s Book 9 gives 100 more inhabitants (72,319; total 471,994) than the Federal Statistical Office publication used here.',
+  'me-1971': 'Andrijevica was part of the municipality of Ivangrad (today Berane).',
+  'me-1981': 'Andrijevica was part of the municipality of Ivangrad (today Berane).',
+  'me-1991': 'The 1991 census (methodology of the time) counts citizens temporarily working abroad as residents, so comparisons with 2003 should be taken with caution.',
 };
 
 const STORAGE_KEY = 'popis-lang';
@@ -210,6 +233,12 @@ export class I18n {
     const lang = this.lang();
     if (lang === 'en') return NAMES_EN[text] ?? text;
     return lang === 'cyr' ? toCyrillic(text) : text;
+  }
+
+  /** A census note from the data (written in Montenegrin) in the current language. */
+  censusNote(country: string, year: number, text: string): string {
+    if (this.lang() === 'en') return CENSUS_NOTES_EN[`${country}-${year}`] ?? text;
+    return this.name(text);
   }
 
   num(value: number, decimals = 0): string {

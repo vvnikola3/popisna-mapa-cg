@@ -73,7 +73,11 @@ export class PanelComponent {
     const c = this.comparison();
     const prev = this.store.previousYear();
     if (c.status === 'changed') {
-      return this.i18n.t('changedBorders', { prev: prev ?? '', list: c.splitOff.map(n => this.i18n.name(n)).join(', ') });
+      const list = (names: string[]) => names.map(n => this.i18n.name(n)).join(', ');
+      return [
+        c.before.length ? this.i18n.t('changedBorders', { prev: prev ?? '', list: list(c.before) }) : '',
+        c.now.length ? this.i18n.t('changedBordersNow', { prev: prev ?? '', list: list(c.now) }) : '',
+      ].filter(Boolean).join(' ');
     }
     if (c.status === 'created') return this.i18n.t('createdAfter', { prev: prev ?? '', parent: this.i18n.name(c.parent) });
     if (!prev) return this.i18n.t('noPrevious');
@@ -87,10 +91,10 @@ export class PanelComponent {
     const prev = this.previousEntity();
     const comparable = this.comparison().status === 'same';
     const mode = this.store.mode();
-    const order = [...TOPICS].sort((a, b) => Number(b === mode) - Number(a === mode));
+    const order = TOPICS.filter(t => this.store.hasTopic(t)).sort((a, b) => Number(b === mode) - Number(a === mode));
     return order.map(topic => {
       const current = groupShares(e, topic);
-      const previous = prev ? groupShares(prev, topic) : null;
+      const previous = prev && this.store.hasTopic(topic, this.store.previous()) ? groupShares(prev, topic) : null;
       return {
         topic,
         current,
@@ -110,7 +114,9 @@ export class PanelComponent {
             deltaCount: changeable && before!.broj > 0 ? ((s.broj - before!.broj) / before!.broj) * 100 : null,
             clickable: s.key !== OTHER_KEY,
           };
-        }),
+        })
+          // a group neither census knew (Bošnjaci before 2003) would be a row of dashes
+          .filter(r => r.currentRecorded || (previous && r.previousRecorded)),
       };
     });
   });
@@ -126,6 +132,22 @@ export class PanelComponent {
   });
 
   readonly source = computed(() => this.store.current()?.census.izvor ?? '');
+  readonly censusNote = computed(() => {
+    const text = this.store.current()?.census.napomena;
+    return text ? this.i18n.censusNote(this.store.country().code, this.store.year(), text) : null;
+  });
+
+  /** Men / women; null for censuses without the split by sex (1948–1991). */
+  readonly sexes = computed(() => {
+    const e = this.entity();
+    if (!e || e.muskarci === null || e.zene === null) return null;
+    return {
+      male: e.muskarci,
+      female: e.zene,
+      maleShare: (e.muskarci / e.stanovnika) * 100,
+      femaleShare: (e.zene / e.stanovnika) * 100,
+    };
+  });
 
   readonly groupName = (key: string) => this.i18n.name(key);
 

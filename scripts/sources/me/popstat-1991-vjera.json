@@ -1,0 +1,360 @@
+{
+ "izvor": "pop-stat.mashke.org (T. Bespyatov), http://pop-stat.mashke.org/yugoslavia-religion-1991.htm",
+ "napomena": "Prepisano iz publikacija Saveznog zavoda za statistiku; ukupni broj stanovnika po opštinama provjeren prema MONSTAT, Popis 2003, Knjiga 9.",
+ "godina": 1991,
+ "tema": "vjera",
+ "jedinice": [
+  {
+   "naziv": "CRNA GORA",
+   "ukupno": 615035,
+   "kategorije": {
+    "PRAVOSLAVCI": 425133,
+    "KATOLICI": 27153,
+    "PROTESTANTI": 853,
+    "MUSLIMANI": 118016,
+    "JEVREJI": 156,
+    "PROORIJENTALNI KULTOVI": 71,
+    "DRUGI": 8780,
+    "VERNICI BEZ VEROISPOVESTI": 180,
+    "NISU VERNICI": 9850,
+    "NEPOZNATO": 24843
+   }
+  },
+  {
+   "naziv": "ANDRIJEVICA",
+   "ukupno": 6696,
+   "kategorije": {
+    "PRAVOSLAVCI": 6526,
+    "KATOLICI": 8,
+    "PROTESTANTI": 0,
+    "MUSLIMANI": 35,
+    "JEVREJI": 0,
+    "PROORIJENTALNI KULTOVI": 1,
+    "DRUGI": 16,
+    "VERNICI BEZ VEROISPOVESTI": 0,
+    "NISU VERNICI": 18,
+    "NEPOZNATO": 92
+   }
+  },
+  {
+   "naziv": "BAR",
+   "ukupno": 37321,
+   "kategorije": {
+    "PRAVOSLAVCI": 18554,
+    "KATOLICI": 2877,
+    "PROTESTANTI": 66,
+    "MUSLIMANI": 9053,
+    "JEVREJI": 7,
+    "PROORIJENTALNI KULTOVI": 22,
+    "DRUGI": 3750,
+    "VERNICI BEZ VEROISPOVESTI": 11,
+    "NISU VERNICI": 604,
+    "NEPOZNATO": 2377
+   }
+  },
+  {
+   "naziv": "BERANE",
+   "ukupno": 38953,
+   "kategorije": {
+    "PRAVOSLAVCI": 24727,
+    "KATOLICI": 93,
+    "PROTESTANTI": 32,
+    "MUSLIMANI": 11305,
+    "JEVREJI": 0,
+    "PROORIJENTALNI KULTOVI": 2,
+    "DRUGI": 1256,
+    "VERNICI BEZ VEROISPOVESTI": 0,
+    "NISU VERNICI": 516,
+    "NEPOZNATO": 1022
+   }
+  },
+  {
+   "naziv": "BIJELO POLJE",
+   "ukupno": 55268,
+   "kategorije": {
+    "PRAVOSLAVCI": 30004,
+    "KATOLICI": 81,
+    "PROTESTANTI": 115,
+    "MUSLIMANI": 22508,
+    "JEVREJI": 18,
+    "PROORIJENTALNI KULTOVI": 10,
+    "DRUGI": 1210,
+    "VERNICI BEZ VEROISPOVESTI": 3,
+    "NISU VERNICI": 389,
+    "NEPOZNATO": 930
+   }
+  },
+  {
+   "naziv": "BUDVA",
+   "ukupno": 11717,
+   "kategorije": {
+    "PRAVOSLAVCI": 10288,
+    "KATOLICI": 356,
+    "PROTESTANTI": 43,
+    "MUSLIMANI": 179,
+    "JEVREJI": 0,
+    "PROORIJENTALNI KULTOVI": 2,
+    "DRUGI": 58,
+    "VERNICI BEZ VEROISPOVESTI": 12,
+    "NISU VERNICI": 226,
+    "NEPOZNATO": 553
+   }
+  },
+  {
+   "naziv": "CETINJE",
+   "ukupno": 20307,
+   "kategorije": {
+    "PRAVOSLAVCI": 18963,
+    "KATOLICI": 155,
+    "PROTESTANTI": 2,
+    "MUSLIMANI": 382,
+    "JEVREJI": 0,
+    "PROORIJENTALNI KULTOVI": 0,
+    "DRUGI": 36,
+    "VERNICI BEZ VEROISPOVESTI": 6,
+    "NISU VERNICI": 249,
+    "NEPOZNATO": 514
+   }
+  },
+  {
+   "naziv": "DANILOVGRAD",
+   "ukupno": 14718,
+   "kategorije": {
+    "PRAVOSLAVCI": 13879,
+    "KATOLICI": 91,
+    "PROTESTANTI": 4,
+    "MUSLIMANI": 20,
+    "JEVREJI": 0,
+    "PROORIJENTALNI KULTOVI": 0,
+    "DRUGI": 22,
+    "VERNICI BEZ VEROISPOVESTI": 3,
+    "NISU VERNICI": 115,
+    "NEPOZNATO": 584
+   }
+  },
+  {
+   "naziv": "HERCEG NOVI",
+   "ukupno": 27593,
+   "kategorije": {
+    "PRAVOSLAVCI": 22015,
+    "KATOLICI": 1400,
+    "PROTESTANTI": 77,
+    "MUSLIMANI": 509,
+    "JEVREJI": 7,
+    "PROORIJENTALNI KULTOVI": 0,
+    "DRUGI": 110,
+    "VERNICI BEZ VEROISPOVESTI": 21,
+    "NISU VERNICI": 1127,
+    "NEPOZNATO": 2327
+   }
+  },
+  {
+   "naziv": "KOLAŠIN",
+   "ukupno": 11120,
+   "kategorije": {
+    "PRAVOSLAVCI": 10362,
+    "KATOLICI": 28,
+    "PROTESTANTI": 17,
+    "MUSLIMANI": 37,
+    "JEVREJI": 0,
+    "PROORIJENTALNI KULTOVI": 0,
+    "DRUGI": 18,
+    "VERNICI BEZ VEROISPOVESTI": 0,
+    "NISU VERNICI": 25,
+    "NEPOZNATO": 633
+   }
+  },
+  {
+   "naziv": "KOTOR",
+   "ukupno": 22410,
+   "kategorije": {
+    "PRAVOSLAVCI": 16426,
+    "KATOLICI": 2853,
+    "PROTESTANTI": 61,
+    "MUSLIMANI": 190,
+    "JEVREJI": 9,
+    "PROORIJENTALNI KULTOVI": 2,
+    "DRUGI": 120,
+    "VERNICI BEZ VEROISPOVESTI": 6,
+    "NISU VERNICI": 751,
+    "NEPOZNATO": 1992
+   }
+  },
+  {
+   "naziv": "MOJKOVAC",
+   "ukupno": 10830,
+   "kategorije": {
+    "PRAVOSLAVCI": 10401,
+    "KATOLICI": 27,
+    "PROTESTANTI": 1,
+    "MUSLIMANI": 35,
+    "JEVREJI": 0,
+    "PROORIJENTALNI KULTOVI": 1,
+    "DRUGI": 35,
+    "VERNICI BEZ VEROISPOVESTI": 2,
+    "NISU VERNICI": 45,
+    "NEPOZNATO": 283
+   }
+  },
+  {
+   "naziv": "NIKŠIĆ",
+   "ukupno": 74706,
+   "kategorije": {
+    "PRAVOSLAVCI": 68950,
+    "KATOLICI": 258,
+    "PROTESTANTI": 93,
+    "MUSLIMANI": 1740,
+    "JEVREJI": 3,
+    "PROORIJENTALNI KULTOVI": 6,
+    "DRUGI": 648,
+    "VERNICI BEZ VEROISPOVESTI": 3,
+    "NISU VERNICI": 1237,
+    "NEPOZNATO": 1768
+   }
+  },
+  {
+   "naziv": "PLAV",
+   "ukupno": 19305,
+   "kategorije": {
+    "PRAVOSLAVCI": 3671,
+    "KATOLICI": 457,
+    "PROTESTANTI": 2,
+    "MUSLIMANI": 14648,
+    "JEVREJI": 0,
+    "PROORIJENTALNI KULTOVI": 0,
+    "DRUGI": 120,
+    "VERNICI BEZ VEROISPOVESTI": 0,
+    "NISU VERNICI": 23,
+    "NEPOZNATO": 384
+   }
+  },
+  {
+   "naziv": "PLJEVLJA",
+   "ukupno": 39593,
+   "kategorije": {
+    "PRAVOSLAVCI": 31076,
+    "KATOLICI": 39,
+    "PROTESTANTI": 14,
+    "MUSLIMANI": 6837,
+    "JEVREJI": 6,
+    "PROORIJENTALNI KULTOVI": 1,
+    "DRUGI": 142,
+    "VERNICI BEZ VEROISPOVESTI": 21,
+    "NISU VERNICI": 592,
+    "NEPOZNATO": 865
+   }
+  },
+  {
+   "naziv": "PLUŽINE",
+   "ukupno": 5247,
+   "kategorije": {
+    "PRAVOSLAVCI": 5145,
+    "KATOLICI": 9,
+    "PROTESTANTI": 1,
+    "MUSLIMANI": 10,
+    "JEVREJI": 0,
+    "PROORIJENTALNI KULTOVI": 0,
+    "DRUGI": 0,
+    "VERNICI BEZ VEROISPOVESTI": 0,
+    "NISU VERNICI": 41,
+    "NEPOZNATO": 41
+   }
+  },
+  {
+   "naziv": "PODGORICA",
+   "ukupno": 152025,
+   "kategorije": {
+    "PRAVOSLAVCI": 115489,
+    "KATOLICI": 11365,
+    "PROTESTANTI": 271,
+    "MUSLIMANI": 12942,
+    "JEVREJI": 44,
+    "PROORIJENTALNI KULTOVI": 21,
+    "DRUGI": 1031,
+    "VERNICI BEZ VEROISPOVESTI": 66,
+    "NISU VERNICI": 3401,
+    "NEPOZNATO": 7395
+   }
+  },
+  {
+   "naziv": "ROŽAJ",
+   "ukupno": 22976,
+   "kategorije": {
+    "PRAVOSLAVCI": 1528,
+    "KATOLICI": 29,
+    "PROTESTANTI": 3,
+    "MUSLIMANI": 21020,
+    "JEVREJI": 19,
+    "PROORIJENTALNI KULTOVI": 0,
+    "DRUGI": 60,
+    "VERNICI BEZ VEROISPOVESTI": 4,
+    "NISU VERNICI": 35,
+    "NEPOZNATO": 278
+   }
+  },
+  {
+   "naziv": "ŠAVNIK",
+   "ukupno": 3690,
+   "kategorije": {
+    "PRAVOSLAVCI": 3561,
+    "KATOLICI": 6,
+    "PROTESTANTI": 0,
+    "MUSLIMANI": 1,
+    "JEVREJI": 0,
+    "PROORIJENTALNI KULTOVI": 0,
+    "DRUGI": 2,
+    "VERNICI BEZ VEROISPOVESTI": 0,
+    "NISU VERNICI": 33,
+    "NEPOZNATO": 87
+   }
+  },
+  {
+   "naziv": "TIVAT",
+   "ukupno": 11429,
+   "kategorije": {
+    "PRAVOSLAVCI": 5659,
+    "KATOLICI": 2994,
+    "PROTESTANTI": 26,
+    "MUSLIMANI": 359,
+    "JEVREJI": 10,
+    "PROORIJENTALNI KULTOVI": 3,
+    "DRUGI": 95,
+    "VERNICI BEZ VEROISPOVESTI": 20,
+    "NISU VERNICI": 267,
+    "NEPOZNATO": 1996
+   }
+  },
+  {
+   "naziv": "ULCINJ",
+   "ukupno": 24217,
+   "kategorije": {
+    "PRAVOSLAVCI": 3156,
+    "KATOLICI": 4025,
+    "PROTESTANTI": 25,
+    "MUSLIMANI": 16206,
+    "JEVREJI": 33,
+    "PROORIJENTALNI KULTOVI": 0,
+    "DRUGI": 51,
+    "VERNICI BEZ VEROISPOVESTI": 2,
+    "NISU VERNICI": 146,
+    "NEPOZNATO": 573
+   }
+  },
+  {
+   "naziv": "ŽABLJAK",
+   "ukupno": 4914,
+   "kategorije": {
+    "PRAVOSLAVCI": 4753,
+    "KATOLICI": 2,
+    "PROTESTANTI": 0,
+    "MUSLIMANI": 0,
+    "JEVREJI": 0,
+    "PROORIJENTALNI KULTOVI": 0,
+    "DRUGI": 0,
+    "VERNICI BEZ VEROISPOVESTI": 0,
+    "NISU VERNICI": 10,
+    "NEPOZNATO": 149
+   }
+  }
+ ]
+}

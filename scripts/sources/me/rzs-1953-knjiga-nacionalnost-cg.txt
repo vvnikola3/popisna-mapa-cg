@@ -1,0 +1,99 @@
+# Savezni zavod za statistiku, Popis 1953 – Ukupno stanovništvo po narodnosti (srez, opština), NR Crna Gora
+# https://publikacije.stat.gov.rs/G1953/Pdf/G19534001.pdf, pdftotext -raw, YUSCII ([ = Š, @ = Ž, Q = LJ, W = NJ …)
+# Kolone: svega, Srbi, Hrvati, Slovenci, Makedonci, Crnogorci, Jugosloveni neopredeljeni, Šiptari, Česi, Italijani, Rusi, ostali Sloveni, ostali neslovenski
+NR Crna Gora 419873 13864 9814 642 362 363686 6424 23460 56 118 198 57 1192
+SREZ BARSKI 39328 1212 399 46 28 25139 73 12258 1 9 9 8 146
+Barska 8609 232 186 10 15 7952 14 95 1 5 3 - 96
+Crmni~ka 6626 56 10 2 - 6548 3 1 - - - - 6
+Krajinska 3371 1 1 1 - 776 2 2590 - - - - -
+Mrkojevi}ka 3053 - 3 1 2 3036 3 6 - - - - 2
+Pa{trovska 2239 730 54 10 4 1420 2 2 - 3 - - 14
+Spi~anska 1350 110 95 8 - 1087 30 7 - - - - 13
+Ulciwska 8480 64 47 12 6 4011 18 4295 - 1 6 7 13
+Vladimirska 5600 19 3 2 1 309 1 5262 - - - 1 2
+SREZ BJELOPOQSKI 46057 378 48 17 5 43992 1504 2 2 2 3 - 104
+Bjelopoqska 5115 74 12 2 5 4953 56 1 - - - - 12
+Bistri~ka 4189 89 - - - 3579 498 1 - - - - 22
+Koritska 4192 7 3 - - 3756 425 - - - - - 1
+Limska 8856 51 2 - - 8628 160 - - - - - 15
+Lozansko-Zatonska 6970 14 3 1 - 6629 322 - - - - - 1
+Mojkova~ka 4625 91 26 13 - 4439 36 - 1 - 2 - 17
+Pavinopoqska 4903 34 1 - - 4862 5 - - - - - 1
+Ravnorije~ka 2670 7 1 - - 2645 2 - 1 1 - - 13
+Toma{evska 4537 11 - 1 - 4501 - - - 1 1 - 22
+SREZ BOKOKOTORSKI 36752 8601 8182 300 67 19119 89 35 28 46 87 14 184
+Budvanska 2125 136 131 4 3 1835 - 2 2 1 2 - 9
+Grbaqska 3901 412 2 - - 3485 1 - - - - - 1
+Hercegnovska 13384 5032 1497 157 34 6477 54 3 6 14 42 2 66
+Kotorska 7495 970 2668 57 12 3585 22 23 18 19 30 3 88
+Risanska 4089 1074 450 10 2 2522 8 2 2 5 6 1 7
+Tivatska 5758 977 3434 72 16 1215 4 5 - 7 7 8 13
+SREZ CETIWSKI 26317 228 115 42 15 25793 39 19 5 13 24 3 21
+Cetiwska 11065 197 106 41 12 10598 37 19 5 10 20 2 18
+Cucka 2682 1 - - - 2681 - - - - - - -
+^evska 2972 8 1 - - 2961 - - - - 2 - -
+Wegu{ko-]ekli}ka 1965 - 1 - - 1963 - - - - - 1 -
+Rije~ka 6276 21 7 1 3 6236 2 - - 3 2 - 1
+Sokolska 1357 1 - - - 1354 - - - - - - 2
+SREZ DURMITORSKI 23570 118 5 3 1 23427 8 - - - 2 - 6
+Drobwa~ka 4182 2 1 - - 4175 1 - - - - - 3
+Jezerska 5160 7 2 3 1 5145 1 - - - 1 - -
+Planinopivska 2868 1 - - - 2865 2 - - - - - -
+[aranska 2240 21 - - - 2218 - - - - - - 1
+Usko~ka 3038 2 2 - - 3033 1 - - - - - -
+@upopivska 6082 85 - - - 5991 3 - - - 1 - 2
+SREZ IVANGRADSKI 70641 356 51 19 24 64201 2127 3567 3 1 3 3 286
+Andrijevi~ka 6928 55 9 5 9 6844 2 - 1 1 - - 2
+Bi{evska 4936 64 - - - 3557 1104 9 - - - 1 201
+Budimska 7424 74 2 5 2 7336 - - - - - - 5
+Gusiwska 6848 23 4 2 1 4390 229 2191 - - 1 1 6
+Ivangrad 4513 59 20 1 8 4367 11 31 2 - 1 1 12
+Lubni~ka 2353 2 1 - - 2350 - - - - - - -
+Manastirska 5468 6 3 - - 5453 2 3 - - 1 - -
+Murinska 5003 10 1 1 1 4719 - 250 - - - - 21
+Petwi~ka 9065 9 - - - 8655 393 8 - - - - -
+Plavska 7161 12 2 4 2 6640 17 474 - - - - 10
+Ro`ajska 7732 36 8 1 1 6688 368 601 - - - - 29
+Trep~anska 3210 6 1 - - 3202 1 - - - - - -
+SREZ KOLA[INSKI 17523 94 34 18 13 17332 13 3 - 2 3 1 10
+Dowomora~ka 3140 1 - - 1 3137 - - - - - 1 -
+Gorwomora~ka 1870 - - - - 1869 - - - - 1 - -
+Kola{inska 5514 37 11 7 6 5436 7 1 - 2 2 - 5
+Mate{evska 2112 24 5 9 4 2063 5 1 - - - - 1
+Poqska 2627 32 18 2 2 2567 1 1 - - - - 4
+Rova~ka 2260 - - - - 2260 - - - - - - -
+SREZ NIK[I]KI 46454 954 386 69 109 44549 79 85 3 10 34 10 166
+Bawskovu~edolska 7272 37 1 - - 7214 18 - - - - 1 1
+Golijska 1797 - - - - 1797 - - - - - - -
+Gorwepoqska 4457 16 4 1 1 4430 - - - - 1 - 4
+Grahovska 3819 17 5 - - 3779 3 - - - - - 15
+Lukovska 4172 23 147 3 - 3974 1 14 - - 1 - 9
+Mo{tani~ka 4487 61 23 6 4 4388 5 - - - - - -
+Nik{i}ka 14242 795 198 57 103 12775 52 71 3 10 32 9 137
+Pje{iva~ka 1933 2 4 - 1 1926 - - - - - - -
+@upska 4275 3 4 2 - 4266 - - - - - - -
+SREZ PQEVAQSKI 40876 827 97 31 17 37368 2401 31 2 1 6 10 85
+Bobovska 1446 117 - - - 1328 1 - - - - - -
+Boqani}ka 5687 61 - - - 5129 494 1 - - - - 2
+Brezni~ka 4999 38 - - - 4961 - - - - - - -
+Bukovi~ka 2794 9 - - - 1982 803 - - - - - -
+Kosani~ka 3269 5 - - 1 3219 40 1 - - - - 3
+Mao~ka 5462 32 1 - - 5416 - - - - - - 13
+Meqa~ka 3468 35 2 11 2 3134 271 1 - - 4 - 8
+Pqevaqska 7521 495 94 20 14 6257 541 28 2 1 2 10 57
+Zabrdska 6230 35 - - - 5942 251 - - - - - 2
+GRAD TITOGRAD 16324 829 398 75 58 14461 73 245 9 29 23 5 119
+SREZ TITOGRADSKI 56031 267 99 22 25 48305 18 7215 3 5 4 3 65
+Bio~ka 2197 6 1 1 - 2188 1 - - - - - -
+Danilovgradska 6750 117 52 8 12 6528 8 - 2 - 1 2 20
+Ku~ka 5690 19 10 - 3 5171 - 485 1 - 1 - -
+Qe{anska 2581 3 - 3 - 2574 - - - - - - 1
+Qe{kopoqska 4283 9 - - - 4270 - 1 - - 1 - 2
+Qevore~ka 3003 1 - - - 3001 1 - - - - - -
+Piperska 2325 3 1 1 - 2313 - 1 - 4 - - 2
+Slapska 4959 32 12 2 - 4910 1 - - - - 1 1
+Spu{ka 3961 8 2 - 2 3930 1 - - - 1 - 17
+Tu{ka 6972 30 7 5 5 1336 5 5579 - - - - 5
+Zagara~ko-Komanska 3254 - - - 1 3252 - 1 - - - - -
+Zatrijeba~ka 1177 2 1 - - 29 - 1145 - - - - -
+Zetska 8879 37 13 2 2 8803 1 3 - 1 - - 17

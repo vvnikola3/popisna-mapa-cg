@@ -9,10 +9,14 @@ export interface Share {
 }
 
 export interface CensusEntity {
+  /** Name at the time of the census (e.g. Titograd in 1981). */
   naziv: string;
+  /** Today's name, when it differs. */
+  danas?: string;
   stanovnika: number;
-  muskarci: number;
-  zene: number;
+  /** null for censuses where the split by sex is not available (1948–1991). */
+  muskarci: number | null;
+  zene: number | null;
   prosjecnaStarost: number | null;
   starost: { '0-14': number; '15-64': number; '65+': number } | null;
   povrsinaKm2: number;
@@ -25,6 +29,8 @@ export interface CensusEntity {
 export interface CensusYear {
   godina: number;
   izvor: string;
+  /** Caveats for this census (recalculated borders, methodology…). */
+  napomena?: string;
   drzava: CensusEntity;
   opstine: Record<string, CensusEntity>;
 }
@@ -43,6 +49,13 @@ export interface Territory {
   osnovana?: number;
   /** Municipality it was part of before that. */
   izdvojenaIz?: string;
+}
+
+/** public/data/<country>/teritorije.json */
+export interface TerritoryRegistry {
+  opstine: Territory[];
+  /** Censuses whose figures were recalculated to later borders: { "1948": 2003 }. */
+  teritorijaPopisa?: Record<string, number | string>;
 }
 
 export type Topic = 'nationality' | 'religion' | 'language';
@@ -72,6 +85,8 @@ export const NATIONALITY_GROUPS: Group[] = [
   { key: 'Albanci', color: '#e07b1a', members: ['Albanci'] },
   { key: 'Muslimani', color: '#159a8c', members: ['Muslimani'] },
   { key: 'Hrvati', color: '#7b4fb3', members: ['Hrvati'] },
+  // a declared nationality in the censuses 1961–1991 (5,7% in 1981); in 1953 "Yugoslav, undecided"
+  { key: 'Jugosloveni', color: '#d6619a', members: ['Jugosloveni', 'Jugosloveni – neopredijeljeni'] },
   {
     key: UNDECLARED_KEY, color: UNDECLARED_COLOR, special: true,
     members: ['Ne želi da se izjasni', 'Neizjašnjeni i neopredijeljeni'],
@@ -188,5 +203,6 @@ export const shareScale = (color: string): Scale => ({
 export type Comparison =
   | { status: 'none' }
   | { status: 'same'; entity: CensusEntity }
-  | { status: 'changed'; entity: CensusEntity; splitOff: string[] }
+  /** Same municipality, different territory: `before` = parts it had then but not now, `now` = the reverse. */
+  | { status: 'changed'; entity: CensusEntity; before: string[]; now: string[] }
   | { status: 'created'; parent: string };

@@ -134,19 +134,25 @@ export class UrlState {
 
   /** Municipality and focused group need the loaded data to be resolved. */
   private applyPending() {
+    // a link to a view the census does not have (e.g. ethnicity in 1948) falls back to population
+    const current = this.store.mode();
+    if ((TOPICS as string[]).includes(current) && !this.store.hasTopic(current as Topic)) this.store.setMode('population');
+
     const req = this.pending;
     this.pending = null;
     if (!req) return;
 
     if (req.municipality) {
       const census = this.store.current()!.census;
-      const id = Object.keys(census.opstine).find(k => slugify(census.opstine[k].naziv) === req.municipality);
+      // the name at the time (titograd in 1981) or today's name (podgorica)
+      const id = Object.keys(census.opstine).find(k => slugify(census.opstine[k].naziv) === req.municipality)
+        ?? Object.keys(census.opstine).find(k => slugify(census.opstine[k].danas ?? '') === req.municipality);
       if (id) this.store.pinnedId.set(id);
     }
     const mode = this.store.mode();
     if (req.group && (TOPICS as string[]).includes(mode)) {
       const group = groupsFor(mode as Topic).find(g => slugify(g.key) === req.group);
-      if (group) this.store.focusGroup.set(group.key);
+      if (group && this.store.recorded(this.store.current(), mode as Topic, group.key)) this.store.focusGroup.set(group.key);
     }
   }
 

@@ -63,13 +63,28 @@ export class MapComponent implements OnInit, OnDestroy {
 
   readonly modes = computed(() => {
     const prev = this.store.previousYear();
+    const loaded = !!this.store.current();
+    // a topic the selected census did not ask about (1948: no ethnicity, religion only from 1991…)
+    const topic = (mode: Topic, key: 'modeNationality' | 'modeReligion' | 'modeLanguage') => {
+      const disabled = loaded && !this.store.hasTopic(mode);
+      const year = this.store.year();
+      const why = this.store.country().notAsked?.[mode]?.includes(year)
+        ? this.i18n.t('topicNotAsked', { year })
+        : this.i18n.t('topicUnavailable');
+      return { mode: mode as MapMode, label: this.i18n.t(key), disabled, title: disabled ? why : '' };
+    };
     return [
-      { mode: 'nationality' as MapMode, label: this.i18n.t('modeNationality'), disabled: false },
-      { mode: 'religion' as MapMode, label: this.i18n.t('modeReligion'), disabled: false },
-      { mode: 'language' as MapMode, label: this.i18n.t('modeLanguage'), disabled: false },
-      { mode: 'population' as MapMode, label: this.i18n.t('modePopulation'), disabled: false },
-      { mode: 'density' as MapMode, label: this.i18n.t('modeDensity'), disabled: false },
-      { mode: 'change' as MapMode, label: prev ? this.i18n.t('modeChange', { prev }) : this.i18n.t('change'), disabled: !prev },
+      topic('nationality', 'modeNationality'),
+      topic('religion', 'modeReligion'),
+      topic('language', 'modeLanguage'),
+      { mode: 'population' as MapMode, label: this.i18n.t('modePopulation'), disabled: false, title: '' },
+      { mode: 'density' as MapMode, label: this.i18n.t('modeDensity'), disabled: false, title: '' },
+      {
+        mode: 'change' as MapMode,
+        label: prev ? this.i18n.t('modeChange', { prev }) : this.i18n.t('change'),
+        disabled: !prev,
+        title: prev ? '' : this.i18n.t('noPrevious'),
+      },
     ];
   });
 
@@ -77,7 +92,9 @@ export class MapComponent implements OnInit, OnDestroy {
   readonly legendGroups = computed(() => {
     const mode = this.store.mode();
     if (!isTopic(mode)) return null;
-    return groupsFor(mode).map(g => ({ key: g.key, color: g.color, light: lighten(g.color, 0.5), special: !!g.special }));
+    // only groups this census recorded (no Bosniaks before 2003, no Yugoslavs after 1991…)
+    const current = this.store.current();
+    return groupsFor(mode).filter(g => this.store.recorded(current, mode, g.key)).map(g =>({ key: g.key, color: g.color, light: lighten(g.color, 0.5), special: !!g.special }));
   });
 
   /** Classed legend for population, change, or the share of the focused group. */
@@ -110,14 +127,14 @@ export class MapComponent implements OnInit, OnDestroy {
     const focus = this.store.focusGroup();
 
     let body: CardBody;
-    if (isTopic(mode)) {
+    if (isTopic(mode) && this.store.hasTopic(mode)) {
       const shares = groupShares(entity, mode);
       const focused = focus ? shares.find(s => s.key === focus) : undefined;
       body = focused
         ? { kind: 'focus', topic: mode, share: focused, change: this.store.groupChange(id, mode, focused.key) }
         : { kind: 'groups', topic: mode, groups: shares.filter(s => !s.special).slice(0, 3) };
     } else {
-      body = { kind: mode };
+      body = { kind: isTopic(mode) ? 'population' : mode };
     }
 
     const accent =
@@ -146,6 +163,7 @@ export class MapComponent implements OnInit, OnDestroy {
     effect(() => {
       this.store.mode();
       this.store.focusGroup();
+      this.store.current();
       this.i18n.lang();
       untracked(() => {
         this.renderLabels();
@@ -281,7 +299,8 @@ export class MapComponent implements OnInit, OnDestroy {
     this.attribution =
       `${this.i18n.t('boundaries')}: <a href="https://simplemaps.com/gis/country/me" target="_blank" rel="noopener">simplemaps</a>, ` +
       '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors · ' +
-      `${this.i18n.t('data')}: <a href="https://www.monstat.org" target="_blank" rel="noopener">MONSTAT</a>`;
+      `${this.i18n.t('data')}: <a href="https://www.monstat.org" target="_blank" rel="noopener">MONSTAT</a>, ` +
+      '<a href="https://pop-stat.mashke.org" target="_blank" rel="noopener">pop-stat</a>';
     this.map.attributionControl.addAttribution(this.attribution);
   }
 
@@ -296,7 +315,7 @@ export class MapComponent implements OnInit, OnDestroy {
       return change === null ? '' : this.i18n.signedPct(change);
     }
     const focus = this.store.focusGroup();
-    if (!focus) return '';
+    if (!focus || !this.store.hasTopic(mode)) return '';
     const share = groupShares(entity, mode).find(s => s.key === focus)!;
     return this.i18n.pct(share.procenat);
   }
@@ -336,6 +355,7 @@ export class MapComponent implements OnInit, OnDestroy {
       return change === null ? NO_DATA_COLOR : CHANGE_SCALE.colors[binIndex(change, CHANGE_SCALE.breaks)];
     }
 
+    if (!this.store.hasTopic(mode)) return NO_DATA_COLOR;
     const shares = groupShares(entity, mode);
     const focus = this.store.focusGroup();
     if (focus) {

@@ -11,7 +11,10 @@
     </nav>
 
     <div class="title-row">
-      <h2>{{ isCountry() ? countryName() : i18n.name(e.naziv) }}</h2>
+      <h2>
+        {{ isCountry() ? countryName() : i18n.name(e.naziv) }}
+        @if (!isCountry() && e.danas) { <small class="today">{{ i18n.t('today', { name: i18n.name(e.danas) }) }}</small> }
+      </h2>
       @if (isPinned()) {
         <button type="button" class="pin-chip" (click)="showCountry()" [attr.aria-label]="i18n.t('unpin')">
           {{ i18n.t('pinned') }} <span aria-hidden="true">✕</span>
@@ -58,6 +61,12 @@
 
   @if (note(); as n) {
     <p class="note">{{ n }}</p>
+  }
+  @if (isCountry() && censusNote(); as n) {
+    <p class="note"><strong>{{ i18n.t('censusNote') }}:</strong> {{ n }}</p>
+  }
+  @if (!topics().length && !(isCountry() && censusNote())) {
+    <p class="note">{{ i18n.t('onlyPopulation') }}</p>
   }
 
   @for (view of topics(); track view.topic) {
@@ -173,32 +182,35 @@
     </section>
   }
 
-  <section class="card">
-    <h3>{{ i18n.t('sexAge') }}</h3>
-    <div class="split-bar">
-      <span class="m" [style.width.%]="(e.muskarci / e.stanovnika) * 100"></span>
-      <span class="z" [style.width.%]="(e.zene / e.stanovnika) * 100"></span>
-    </div>
-    <div class="split-legend">
-      <span><i class="dot m"></i>{{ i18n.t('male') }} {{ i18n.num(e.muskarci) }} ({{ i18n.pct((e.muskarci / e.stanovnika) * 100) }})</span>
-      <span><i class="dot z"></i>{{ i18n.t('female') }} {{ i18n.num(e.zene) }} ({{ i18n.pct((e.zene / e.stanovnika) * 100) }})</span>
-    </div>
+  @if (sexes(); as sx) {
+    <section class="card">
+      <h3>{{ i18n.t('sexAge') }}</h3>
+      <div class="split-bar">
+        <span class="m" [style.width.%]="sx.maleShare"></span>
+        <span class="z" [style.width.%]="sx.femaleShare"></span>
+      </div>
+      <div class="split-legend">
+        <span><i class="dot m"></i>{{ i18n.t('male') }} {{ i18n.num(sx.male) }} ({{ i18n.pct(sx.maleShare) }})</span>
+        <span><i class="dot z"></i>{{ i18n.t('female') }} {{ i18n.num(sx.female) }} ({{ i18n.pct(sx.femaleShare) }})</span>
+      </div>
 
-    <h4>{{ i18n.t('ageGroups') }}</h4>
-    @if (ageGroups(); as groups) {
-      @for (g of groups; track g.key) {
-        <div class="bar-row">
-          <span>{{ g.key }}</span>
-          <span class="bar"><span [style.width.%]="g.share"></span></span>
-          <span class="num">{{ i18n.pct(g.share) }}</span>
-        </div>
+      <h4>{{ i18n.t('ageGroups') }}</h4>
+      @if (ageGroups(); as groups) {
+        @for (g of groups; track g.key) {
+          <div class="bar-row">
+            <span>{{ g.key }}</span>
+            <span class="bar"><span [style.width.%]="g.share"></span></span>
+            <span class="num">{{ i18n.pct(g.share) }}</span>
+          </div>
+        }
+      } @else {
+        <p class="muted">{{ i18n.t('noAgeData') }}</p>
       }
-    } @else {
-      <p class="muted">{{ i18n.t('noAgeData') }}</p>
-    }
-  </section>
+    </section>
+  }
 
   <p class="source">
     {{ i18n.t('source') }}: {{ i18n.name(source()) }}. {{ i18n.t('areaNote') }}
+    @if (!isCountry() && censusNote(); as n) { <br>{{ i18n.t('censusNote') }}: {{ n }} }
   </p>
 }

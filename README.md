@@ -2,7 +2,7 @@
 
 Interaktivna mapa rezultata popisa stanovništva Crne Gore po opštinama: nacionalna,
 vjerska i jezička struktura, broj stanovnika i promjena između popisa, sa timeline-om
-popisa od 1948. do 2023. (trenutno sa podacima za 2003., 2011. i 2023.).
+svih popisa od 1948. do 2023. (za 1948. samo broj stanovnika).
 Ćirilica, latinica i engleski; radi i na telefonu. Planirane su i druge države regiona.
 
 Aplikacija je statična (Angular + Leaflet + d3): podaci se unaprijed pripremaju
@@ -75,7 +75,14 @@ src/app/core/         prevodi (ćirilica / latinica / EN), transliteracija, zast
 
 ## Izvori podataka i licence
 
-- **Popis stanovništva:** [MONSTAT](https://www.monstat.org) – popisi 2003., 2011. i 2023.
+- **Popis stanovništva:** [MONSTAT](https://www.monstat.org) – popisi 2003., 2011. i 2023.,
+  i broj stanovnika 1948–1991 (Popis 2003, Knjiga 9)
+- **Nacionalnost 1961–1991 i vjera 1991:** [pop-stat.mashke.org](https://pop-stat.mashke.org)
+  (T. Bespjatov), prema publikacijama Saveznog zavoda za statistiku SFRJ
+- **Nacionalnost 1953:** Savezni zavod za statistiku, po tadašnjim opštinama
+  ([publikacije.stat.gov.rs](https://publikacije.stat.gov.rs/G1953/Pdf/G19534001.pdf)), procjena po današnjim
+- **Pol i starost 1991:** Savezni zavod za statistiku, knjiga „Stanovništvo prema starosti i polu“,
+  digitalizovana na [publikacije.stat.gov.rs](https://publikacije.stat.gov.rs/G1991/Pdf/G19914023.pdf)
 - **Granice opština:** [simplemaps](https://simplemaps.com/gis/country/me), licenca
   [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 - **Granica opštine Zeta:** © [OpenStreetMap](https://www.openstreetmap.org/copyright)
