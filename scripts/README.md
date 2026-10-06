@@ -40,6 +40,8 @@ nazivi razlikuju između popisa (npr. „Muslimanska" vjera 2011, „Nije vjerni
 ## Izvori (`sources/me/`)
 
 - `teritorije.json` – registar opština
+- `povrsine.json` – zvanične površine opština (tabela 1-2 iz Statističkog godišnjaka 2025,
+  tekst tabele u `monstat-godisnjak-2025-povrsine.txt`)
 - `simplemaps-me.json` – granice 24 opštine (simplemaps.com, CC BY 4.0), prije dodavanja Zete
 - `osm-zeta-podgorica-tuzi.json` – granice iz OpenStreetMap-a (ODbL)
 - `monstat-2003-knjiga3.pdf` – [MONSTAT, Popis 2003](https://www.monstat.org/cg/page.php?id=222), Knjiga 3
@@ -58,4 +60,8 @@ nazivi razlikuju između popisa (npr. „Muslimanska" vjera 2011, „Nije vjerni
   može biti do 3% manji od ukupnog.
 - 2003: stranica za cijelu Crnu Goru je u PDF-u ispremiještana, pa se pol i starost
   za državu računaju kao zbir opština; postoji i kategorija „nepoznata starost“.
-- Površina je izračunata iz granica i približna je (ukupno ≈ 13.856 km², zvanično 13.812 km²).
+- Površina i gustina koriste **zvanične površine** iz `sources/me/povrsine.json` (MONSTAT,
+  Statistički godišnjak 2025, izvor Uprava za nekretnine). Za ranije popise površina opštine
+  je zbir današnjih opština koje su tada bile njen dio. Ukupno za Crnu Goru (13.883 km²)
+  uključuje i Skadarsko jezero, koje ne pripada nijednoj opštini. Za Tuzi i Zetu MONSTAT
+  daje privremenu površinu.

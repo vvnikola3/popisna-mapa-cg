@@ -230,7 +230,23 @@ table {
     border-left: 1px solid var(--line);
   }
 
+  // narrow panel: the count is shown in small type under the percentage
+  .stacked-count {
+    display: block;
+    margin-top: 1px;
+    font-size: 10.5px;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .stacked-head span {
+    display: block;
+    font-size: 10px;
+    font-weight: 400;
+  }
+
   // narrow panel: a little less padding so the five columns fit next to long names
+  &.compact { font-size: 12px; }
   &.compact th, &.compact td { padding-left: 3px; padding-right: 3px; }
 
   .delta-col, .count-change {
@@ -390,4 +406,10 @@ table {
 
   &:hover { border-color: var(--red); color: var(--red-dark); }
   &.done { border-color: #2e8b57; color: #1f6b41; }
+}
+
+// small phones (360 px and below): every pixel of table width counts
+@media (max-width: 400px) {
+  :host { padding-left: 10px; padding-right: 10px; }
+  .card { padding-left: 8px; padding-right: 8px; }
 }

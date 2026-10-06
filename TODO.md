@@ -2,10 +2,6 @@
 
 ## Sljedeće
 
-- [ ] **Telefon: u tabelama se vide samo procenti, ne i brojevi.**
-  Kad je panel uzak (< 480 px, `COMPACT_BELOW` u `panel.component.ts`), kolone „broj“ se
-  sakrivaju da bi procenti i obje promjene stali. Treba naći način da broj ipak bude dostupan,
-  npr. sitno ispod procenta u istoj ćeliji, ili dodir na red otvara detalje sa brojevima.
 - [ ] **Google Search Console** – prijaviti domen `popisi.org` (TXT zapis na Porkbunu) i
   poslati `sitemap.xml`. Tehnički dio na sajtu je gotov.
 
@@ -20,3 +16,8 @@
   ukrštene tabele; iz postojećih podataka se ne može izračunati
 - [ ] Država po IP adresi / jeziku browsera – kad bude više država
 - [ ] Mjesne zajednice / naselja unutar opštine – kad se nađu granice
+
+## Urađeno
+
+- [x] Telefon: broj ljudi se prikazuje sitno ispod procenta u uskim tabelama
+- [x] Zvanične površine opština (MONSTAT, Statistički godišnjak 2025) umjesto računatih iz granica

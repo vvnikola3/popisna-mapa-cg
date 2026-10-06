@@ -1,0 +1,19 @@
+{
+  "izvor": "MONSTAT, Statistički godišnjak Crne Gore 2025, tabela 1-2 „Površina Crne Gore i opština“ (izvor: Uprava za nekretnine)",
+  "url": "https://www.monstat.org/uploads/files/publikacije/godisnjak2025/GODISNJAK%202025%20FINAL.pdf",
+  "jedinica": "km2",
+  "napomene": [
+    "Ukupna površina Crne Gore uključuje crnogorski dio Skadarskog jezera, koji ne pripada nijednoj opštini (13.883 − 13.659 = 224 km²).",
+    "Za opštine Tuzi i Zeta MONSTAT daje približnu (privremenu) površinu, do završetka razgraničenja sa Glavnim gradom Podgoricom.",
+    "Za ranije popise površina opštine je zbir sadašnjih opština koje su tada bile njen dio (vidi teritorije.json)."
+  ],
+  "drzava": 13883,
+  "privremene": ["ME24", "ME25"],
+  "opstine": {
+    "ME01": 330, "ME02": 504, "ME03": 499, "ME04": 923, "ME05": 122,
+    "ME06": 898, "ME07": 475, "ME08": 234, "ME09": 906, "ME10": 336,
+    "ME11": 359, "ME12": 2087, "ME13": 326, "ME14": 1343, "ME15": 853,
+    "ME16": 997, "ME17": 431, "ME18": 556, "ME19": 47, "ME20": 261,
+    "ME21": 447, "ME22": 157, "ME23": 174, "ME24": 242, "ME25": 152
+  }
+}

@@ -4,7 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { areasById, withPercent } = require('./parse-helpers');
+const { officialAreas, withPercent } = require('./parse-helpers');
 
 const SRC = path.join(__dirname, 'sources', 'me');
 const OUT = path.join(__dirname, '..', 'public', 'data', 'me');
@@ -78,7 +78,7 @@ function readSex() {
 const male = readSex();
 
 // ---------------------------------------------------------------- assemble + verify
-const areas = areasById(geo);
+const { byId: areas, total: countryArea } = officialAreas('me', 2011);
 const ids = Object.fromEntries(geo.features.map(f => [f.properties.name, f.properties.id]));
 
 function entity(name, area) {
@@ -109,7 +109,7 @@ function entity(name, area) {
 }
 
 const opstine = Object.fromEntries(municipalities.map(n => [ids[n], entity(n, areas[ids[n]])]));
-const drzava = entity(COUNTRY, Object.values(areas).reduce((a, b) => a + b, 0));
+const drzava = entity(COUNTRY, countryArea);
 const sum = Object.values(opstine).reduce((a, b) => a + b.stanovnika, 0);
 if (sum !== drzava.stanovnika) throw new Error(`Municipalities sum ${sum} ≠ country ${drzava.stanovnika}`);
 

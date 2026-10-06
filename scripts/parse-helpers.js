@@ -1,4 +1,6 @@
-const turf = require('@turf/turf');
+const fs = require('fs');
+const path = require('path');
+const { loadRegistry, holderIn } = require('./registry');
 
 /** "179 505" -> 179505, "28,78" -> 28.78, "z"/"-" -> null */
 const num = s => (s === 'z' || s === '-' ? null : +s.replace(/ /g, '').replace(',', '.'));
@@ -36,9 +38,23 @@ function splitsSummingToHead(tokens, count) {
   return res;
 }
 
-/** Area (km², rounded) of each feature in a geo file, keyed by municipality id. */
-function areasById(geo) {
-  return Object.fromEntries(geo.features.map(f => [f.properties.id, Math.round(turf.area(f) / 1e6)]));
+/**
+ * Official areas (km², sources/<country>/povrsine.json) of the municipalities as they
+ * were in `year`: a municipality that later lost territory gets the sum of today's
+ * municipalities that were part of it then. The country total also includes area
+ * outside every municipality (Skadar Lake).
+ */
+function officialAreas(country, year) {
+  const official = JSON.parse(fs.readFileSync(path.join(__dirname, 'sources', country, 'povrsine.json'), 'utf8'));
+  const registry = loadRegistry(country);
+  const byId = {};
+  for (const unit of registry.opstine) {
+    const area = official.opstine[unit.id];
+    if (area == null) throw new Error(`No official area for ${unit.id}`);
+    const holder = holderIn(registry, unit.id, year);
+    byId[holder] = (byId[holder] ?? 0) + area;
+  }
+  return { byId, total: official.drzava };
 }
 
 /** Sorts a list of {naziv, broj} descending and adds `procenat` relative to `total`. */
@@ -49,4 +65,4 @@ function withPercent(list, total) {
     .map(x => ({ naziv: x.naziv, broj: x.broj, procenat: x.procenat ?? Math.round((x.broj / total) * 10000) / 100 }));
 }
 
-module.exports = { num, section, splitsSummingToHead, areasById, withPercent };
+module.exports = { num, section, splitsSummingToHead, officialAreas, withPercent };

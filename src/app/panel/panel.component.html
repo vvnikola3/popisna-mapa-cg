@@ -42,7 +42,7 @@
     </div>
     <div class="stat">
       <span class="label">{{ i18n.t('area') }}</span>
-      <span class="value">≈ {{ i18n.num(e.povrsinaKm2) }} <small>km²</small></span>
+      <span class="value">{{ i18n.num(e.povrsinaKm2) }} <small>km²</small></span>
     </div>
     <div class="stat">
       <span class="label">{{ i18n.t('density') }}</span>
@@ -101,8 +101,14 @@
               }
             </tr>
             <tr class="sub">
-              @if (view.previous) { <th>%</th>@if (!compact()) { <th>{{ i18n.t('colCount') }}</th> } }
-              <th>%</th>@if (!compact()) { <th>{{ i18n.t('colCount') }}</th> }
+              @if (compact()) {
+                <!-- narrow panel: the count sits under the percentage in the same cell -->
+                @if (view.previous) { <th class="stacked-head">%<span>{{ i18n.t('colCount') }}</span></th> }
+                <th class="stacked-head">%<span>{{ i18n.t('colCount') }}</span></th>
+              } @else {
+                @if (view.previous) { <th>%</th><th>{{ i18n.t('colCount') }}</th> }
+                <th>%</th><th>{{ i18n.t('colCount') }}</th>
+              }
               @if (view.previous) {
                 <th class="delta-col">{{ i18n.t('colShare') }}</th>
                 <th>{{ i18n.t('colCount') }}</th>
@@ -117,14 +123,20 @@
                 <td class="name"><span class="name-inner"><i class="swatch" [style.background]="row.color"></i><span>{{ i18n.name(row.key) }}</span></span></td>
                 @if (view.previous) {
                   @if (row.previousRecorded) {
-                    <td class="num prev muted-num">{{ row.previous ? i18n.pct(row.previous.procenat) : '' }}</td>
+                    <td class="num prev muted-num">
+                      {{ row.previous ? i18n.pct(row.previous.procenat) : '' }}
+                      @if (compact() && row.previous) { <span class="stacked-count">{{ i18n.num(row.previous.broj) }}</span> }
+                    </td>
                     @if (!compact()) { <td class="num prev count">{{ row.previous ? i18n.num(row.previous.broj) : '' }}</td> }
                   } @else {
                     <td class="num prev na" [attr.colspan]="compact() ? 1 : 2">–</td>
                   }
                 }
                 @if (row.currentRecorded) {
-                  <td class="num"><strong>{{ i18n.pct(row.current.procenat) }}</strong></td>
+                  <td class="num">
+                    <strong>{{ i18n.pct(row.current.procenat) }}</strong>
+                    @if (compact()) { <span class="stacked-count">{{ i18n.num(row.current.broj) }}</span> }
+                  </td>
                   @if (!compact()) { <td class="num count">{{ i18n.num(row.current.broj) }}</td> }
                 } @else {
                   <td class="num na" [attr.colspan]="compact() ? 1 : 2">–</td>

@@ -3,7 +3,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { num, section, splitsSummingToHead, areasById, withPercent } = require('./parse-helpers');
+const { num, section, splitsSummingToHead, officialAreas, withPercent } = require('./parse-helpers');
 
 const SRC = path.join(__dirname, 'sources', 'me');
 const OUT = path.join(__dirname, '..', 'public', 'data', 'me');
@@ -122,7 +122,7 @@ parseWideTable('Tabela 3.', 'Tabela 4.', 'jezik');
 }
 
 // ---------------------------------------------------------------- assemble + verify
-const areas = areasById(geo);
+const { byId: areas, total: countryArea } = officialAreas('me', 2023);
 const ids = Object.fromEntries(geo.features.map(f => [f.properties.name, f.properties.id]));
 
 function entity(name, area) {
@@ -151,7 +151,7 @@ function entity(name, area) {
 }
 
 const opstine = Object.fromEntries(municipalities.map(n => [ids[n], entity(n, areas[ids[n]])]));
-const drzava = entity(COUNTRY, Object.values(areas).reduce((a, b) => a + b, 0));
+const drzava = entity(COUNTRY, countryArea);
 const sum = Object.values(opstine).reduce((a, b) => a + b.stanovnika, 0);
 if (sum !== drzava.stanovnika) throw new Error(`Municipalities sum ${sum} ≠ country ${drzava.stanovnika}`);
 
