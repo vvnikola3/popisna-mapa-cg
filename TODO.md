@@ -8,16 +8,26 @@
 ## Kasnije (sa liste unapređenja)
 
 - [ ] Još informacija pored vjere, jezika i nacionalnosti
-- [ ] Srbija (podaci, granice, sopstvene grupe; boje po zastavi)
-- [ ] Poređenje opština
 - [ ] Stranica „O projektu“ (čeka tekst)
-- [ ] Kombinacije kategorija (npr. Crnogorci po vjeri) – samo ako MONSTAT objavljuje
-  ukrštene tabele; iz postojećih podataka se ne može izračunati
-- [ ] Država po IP adresi / jeziku browsera – kad bude više država
 - [ ] Mjesne zajednice / naselja unutar opštine – kad se nađu granice
+
+## Nova faza – region
+
+- [ ] **Početna mapa regiona**: posjetilac sam bira državu klikom na mapu ili sa strane,
+  pa se otvara mapa te države (umjesto izbora države po IP adresi)
+- [ ] **Srbija** (podaci, granice, sopstvene grupe; boje po zastavi). Zbog velikog broja opština:
+  - tab „Opštine“: sve opštine na mapi, naziv i podaci tek na hover
+  - tab „Okruzi“: mapa okruga, klik na okrug otvara mapu okruga sa njegovim opštinama
+- [ ] **Kombinovanje opština / regija**: izbor više opština, i iz različitih država (npr. Rudo + Priboj),
+  i zbir njihovih podataka – broj stanovnika, nacionalna, vjerska i jezička struktura
+
+## Odustali smo
+
+- Kombinacije kategorija (npr. Crnogorci po vjeri)
 
 ## Urađeno
 
+- [x] Poređenje opština (do 4, jedna pored druge; link ?poredi=…)
 - [x] Google Search Console – domen verifikovan (TXT na Porkbunu), sitemap poslat
 
 - [x] Svi popisi 1948–1991 (1948 samo broj stanovnika; vjera 1991)

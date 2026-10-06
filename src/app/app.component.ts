@@ -25,15 +25,28 @@ export class AppComponent {
 
   readonly languages = LANGUAGES;
   readonly countries = COUNTRIES;
-  readonly menuOpen = signal(false);
+  /** Wide screens: the menu is a column next to the content, open from the start. */
+  readonly desktop = typeof matchMedia !== 'undefined' && matchMedia('(min-width: 861px)').matches;
+  readonly menuOpen = signal(this.desktop);
   readonly openDropdown = signal<Menu | null>(null);
 
   readonly menu = [
-    { key: 'menuMap', icon: 'map', active: true, soon: false },
-    { key: 'menuCompare', icon: 'compare', active: false, soon: true },
-    { key: 'menuSources', icon: 'doc', active: false, soon: true },
-    { key: 'menuAbout', icon: 'info', active: false, soon: true },
+    { key: 'menuMap', icon: 'map', soon: false },
+    { key: 'menuCompare', icon: 'compare', soon: false },
+    { key: 'menuSources', icon: 'doc', soon: true },
+    { key: 'menuAbout', icon: 'info', soon: true },
   ] as const;
+
+  isActive(key: string) {
+    return key === 'menuCompare' ? this.store.compareMode() : key === 'menuMap' && !this.store.compareMode();
+  }
+
+  openMenuItem(key: string, soon: boolean) {
+    if (soon) return;
+    if (key === 'menuCompare') this.store.startCompare();
+    if (key === 'menuMap') this.store.exitCompare();
+    if (!this.desktop) this.menuOpen.set(false);
+  }
 
   currentLanguage() {
     return LANGUAGES.find(l => l.code === this.i18n.lang())!;
@@ -62,7 +75,7 @@ export class AppComponent {
 
   @HostListener('document:keydown.escape')
   closeAll() {
-    this.menuOpen.set(false);
+    if (!this.desktop) this.menuOpen.set(false);
     this.openDropdown.set(null);
   }
 }

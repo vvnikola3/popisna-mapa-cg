@@ -235,6 +235,44 @@
   border-bottom: 3px solid var(--red);
 }
 
+// desktop: the menu is a column that pushes the content and collapses to icons
+@media (min-width: 861px) {
+  .body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .scrim, .drawer-head { display: none; }
+
+  .drawer {
+    position: static;
+    z-index: auto;
+    flex: none;
+    width: 264px;
+    overflow: hidden;
+    border-right: 1px solid var(--line);
+    box-shadow: none;
+    transform: none;
+    visibility: visible;
+    transition: width 0.2s ease;
+
+    a { white-space: nowrap; }
+
+    em { flex: none; }
+
+    &:not(.open) {
+      width: 60px; // icons centred under the menu button
+
+      a { justify-content: center; padding: 10px 0; }
+      .mi { display: flex; }
+      .label, em { display: none; }
+    }
+  }
+
+  .layout { flex: 1; min-width: 0; }
+}
+
 // ------------------------------------------------------------------ layout
 
 .layout {
@@ -271,6 +309,8 @@
   .header-controls { gap: 6px; }
   .dd-button { height: 36px; padding: 0 8px; gap: 6px; font-size: 13px; }
   .country-name { display: none; }
+
+  .body { display: contents; }
 
   .layout {
     display: flex;

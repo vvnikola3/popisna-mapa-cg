@@ -13,6 +13,9 @@ export interface GroupChange {
   count: number | null;
 }
 
+/** How many municipalities can be compared side by side. */
+export const MAX_COMPARE = 4;
+
 /** Shared UI state: selected country and census, map mode, hovered / pinned municipality. */
 @Injectable({ providedIn: 'root' })
 export class CensusStore {
@@ -29,6 +32,9 @@ export class CensusStore {
   readonly focusGroup = signal<string | null>(null);
   readonly hoveredId = signal<string | null>(null);
   readonly pinnedId = signal<string | null>(null);
+  /** Municipality comparison: while on, a click on the map adds / removes a municipality. */
+  readonly compareMode = signal(false);
+  readonly compareIds = signal<string[]>([]);
 
   readonly current = computed(() => this.years()[this.year()] ?? null);
   readonly previousYear = computed(() => {
@@ -88,6 +94,9 @@ export class CensusStore {
     this.year.set(year);
     this.hoveredId.set(null);
     this.pinnedId.set(null);
+    // compared municipalities stay, unless they did not exist in that census (Zeta in 2011)
+    const census = this.current()?.census;
+    if (census) this.compareIds.update(ids => ids.filter(id => census.opstine[id]));
     const mode = this.mode();
     // (before the data has loaded, UrlState re-checks the topic once it arrives)
     const loaded = !!this.current();
@@ -125,6 +134,24 @@ export class CensusStore {
     }
     this.setMode(topic);
     this.focusGroup.set(group);
+  }
+
+  startCompare() {
+    const pinned = this.pinnedId();
+    this.compareMode.set(true);
+    if (pinned && !this.compareIds().includes(pinned)) this.toggleCompare(pinned);
+    this.pinnedId.set(null);
+  }
+
+  exitCompare() {
+    this.compareMode.set(false);
+    this.compareIds.set([]);
+  }
+
+  toggleCompare(id: string) {
+    this.compareIds.update(ids =>
+      ids.includes(id) ? ids.filter(i => i !== id) : ids.length < MAX_COMPARE ? [...ids, id] : ids
+    );
   }
 
   togglePin(id: string) {

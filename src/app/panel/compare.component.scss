@@ -1,0 +1,162 @@
+:host {
+  display: block;
+}
+
+.head {
+  margin-bottom: 14px;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+h2 {
+  margin: 4px 0 2px;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.close {
+  padding: 4px 12px;
+  border: 1px solid var(--red);
+  border-radius: 999px;
+  background: var(--red-soft);
+  color: var(--red-dark);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.picker {
+  width: 100%;
+  max-width: 320px;
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+
+  &:focus { outline: 2px solid var(--red); outline-offset: 1px; }
+  &:disabled { opacity: 0.55; cursor: default; }
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+table {
+  width: 100%;
+  min-width: calc(130px + var(--cols) * 96px);
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+th, td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  background: var(--card);
+  vertical-align: bottom;
+}
+
+.muni {
+  text-align: right;
+  font-size: 14px;
+
+  span { font-weight: 700; }
+}
+
+.remove {
+  margin-left: 4px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+
+  &:hover { color: var(--red); }
+}
+
+.section th {
+  padding-top: 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--bg);
+}
+
+.name {
+  white-space: nowrap;
+}
+
+.name-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex: none;
+}
+
+.num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* the cell carries a faint bar of the group's share */
+.share {
+  position: relative;
+
+  .bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    opacity: 0.7;
+  }
+
+  strong {
+    display: block;
+    font-weight: 600;
+  }
+
+  small {
+    color: var(--muted);
+    font-size: 11px;
+  }
+}
+
+.up { color: #2166ac; font-weight: 600; }
+.down { color: #b2182b; font-weight: 600; }
+.na { color: var(--muted); }

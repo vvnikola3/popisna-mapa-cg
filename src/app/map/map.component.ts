@@ -156,6 +156,7 @@ export class MapComponent implements OnInit, OnDestroy {
       this.store.focusGroup();
       this.store.hoveredId();
       this.store.pinnedId();
+      this.store.compareIds();
       untracked(() => this.restyle());
     });
 
@@ -245,7 +246,8 @@ export class MapComponent implements OnInit, OnDestroy {
         }
         layer.on('click', (e: L.LeafletMouseEvent) => {
           L.DomEvent.stopPropagation(e);
-          this.store.togglePin(id);
+          if (this.store.compareMode()) this.store.toggleCompare(id);
+          else this.store.togglePin(id);
         });
       },
     });
@@ -326,13 +328,14 @@ export class MapComponent implements OnInit, OnDestroy {
     for (const [id, path] of this.paths) path.setStyle(this.styleFor(id));
     // bring highlighted outlines on top so neighbours don't cover them
     if (pinned) this.paths.get(pinned)?.bringToFront();
+    for (const id of this.store.compareIds()) this.paths.get(id)?.bringToFront();
     if (hovered) this.paths.get(hovered)?.bringToFront();
   }
 
   private styleFor(id: string): L.PathOptions {
     const fill = this.fillFor(id);
     const hovered = id === this.store.hoveredId();
-    const pinned = id === this.store.pinnedId();
+    const pinned = id === this.store.pinnedId() || this.store.compareIds().includes(id);
     const border = isLight(fill) ? '#7d8691' : '#ffffff';
     return {
       fillColor: hovered ? lighten(fill, 0.35) : fill,

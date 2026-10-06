@@ -17,8 +17,8 @@ const COUNT_AFTER_MS = 1500;
 /**
  * Keeps the address bar in sync with what is shown, so every view can be shared:
  *
- *   <base>/<country>/<year>/<view>[/<municipality>]/[?udio=<group>]
- *   e.g. /me/2003/jezik/pljevlja/, /me/2023/nacionalnost/?udio=srbi
+ *   <base>/<country>/<year>/<view>[/<municipality>]/[?udio=<group>][&poredi=<municipality>,…]
+ *   e.g. /me/2003/jezik/pljevlja/, /me/2023/nacionalnost/?udio=srbi, /me/2023/vjera/?poredi=bar,ulcinj
  *
  * The trailing slash matches the pages scripts/build-pages.js writes (dir/index.html),
  * which GitHub Pages serves directly instead of redirecting.
@@ -50,6 +50,8 @@ export const slugify = (text: string) =>
 interface Requested {
   municipality?: string;
   group?: string;
+  /** Slugs of compared municipalities ("" = comparison open, nothing chosen yet). */
+  compare?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -120,7 +122,9 @@ export class UrlState {
   private applyFromUrl(): Requested | null {
     const path = location.pathname.startsWith(BASE) ? location.pathname.slice(BASE.length) : '';
     const [country, year, mode, municipality] = path.split('/').filter(Boolean);
-    const group = new URLSearchParams(location.search).get('udio') ?? undefined;
+    const query = new URLSearchParams(location.search);
+    const group = query.get('udio') ?? undefined;
+    const compare = query.get('poredi') ?? undefined;
     if (!country) return null;
 
     const c = COUNTRIES.find(x => x.code === country && x.available);
@@ -129,7 +133,7 @@ export class UrlState {
     const m = (Object.keys(MODE_SLUGS) as MapMode[]).find(k => MODE_SLUGS[k] === mode);
     if (m && (m !== 'change' || this.store.previousYear())) this.store.setMode(m);
 
-    return municipality || group ? { municipality, group } : null;
+    return municipality || group || compare !== undefined ? { municipality, group, compare } : null;
   }
 
   /** Municipality and focused group need the loaded data to be resolved. */
@@ -142,8 +146,16 @@ export class UrlState {
     this.pending = null;
     if (!req) return;
 
+    const census = this.store.current()!.census;
+    if (req.compare !== undefined) {
+      this.store.compareMode.set(true);
+      const slugs = req.compare.split(',').filter(Boolean);
+      for (const slug of slugs) {
+        const id = Object.keys(census.opstine).find(k => slugify(census.opstine[k].naziv) === slug);
+        if (id) this.store.toggleCompare(id);
+      }
+    }
     if (req.municipality) {
-      const census = this.store.current()!.census;
       // the name at the time (titograd in 1981) or today's name (podgorica)
       const id = Object.keys(census.opstine).find(k => slugify(census.opstine[k].naziv) === req.municipality)
         ?? Object.keys(census.opstine).find(k => slugify(census.opstine[k].danas ?? '') === req.municipality);
@@ -161,7 +173,13 @@ export class UrlState {
     const pinned = this.store.pinnedId();
     const name = pinned ? this.store.current()?.census.opstine[pinned]?.naziv : null;
     if (name) parts.push(slugify(name));
+    const query: string[] = [];
     const focus = this.store.focusGroup();
-    return BASE + parts.join('/') + '/' + (focus ? `?udio=${slugify(focus)}` : '');
+    if (focus) query.push(`udio=${slugify(focus)}`);
+    if (this.store.compareMode()) {
+      const opstine = this.store.current()?.census.opstine ?? {};
+      query.push('poredi=' + this.store.compareIds().map(id => slugify(opstine[id]?.naziv ?? id)).join(','));
+    }
+    return BASE + parts.join('/') + '/' + (query.length ? '?' + query.join('&') : '');
   }
 }

@@ -3,6 +3,7 @@ import { CensusStore } from '../census/census.store';
 import { GroupShare, OTHER_KEY, TOPICS, Topic, groupShares } from '../census/census.model';
 import { I18n } from '../core/i18n.service';
 import { PieChartComponent } from './pie-chart.component';
+import { CompareComponent } from './compare.component';
 
 /** Panel content width (px) under which the tables drop their count columns. */
 const COMPACT_BELOW = 480;
@@ -32,7 +33,7 @@ interface TopicView {
 @Component({
   selector: 'app-panel',
   standalone: true,
-  imports: [PieChartComponent],
+  imports: [PieChartComponent, CompareComponent],
   templateUrl: './panel.component.html',
   styleUrl: './panel.component.scss',
 })

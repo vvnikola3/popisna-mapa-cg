@@ -1,0 +1,82 @@
+<div class="head">
+  <div class="title-row">
+    <h2>{{ i18n.t('compareTitle') }}</h2>
+    <button type="button" class="close" (click)="store.exitCompare()">{{ i18n.t('compareClose') }} <span aria-hidden="true">✕</span></button>
+  </div>
+  <p class="meta">
+    {{ i18n.t('census') }} {{ store.year() }}. ·
+    {{ full() ? i18n.t('compareFull', { max }) : i18n.t('compareHint', { max }) }}
+  </p>
+  <select class="picker" #picker (change)="add(picker)" [disabled]="full()" [attr.aria-label]="i18n.t('compareSelect')">
+    <option value="">{{ i18n.t('compareSelect') }}</option>
+    @for (o of options(); track o.id) { <option [value]="o.id">{{ o.name }}</option> }
+  </select>
+</div>
+
+@if (columns().length) {
+  <div class="table-wrap">
+    <table [style.--cols]="columns().length">
+      <thead>
+        <tr>
+          <th></th>
+          @for (c of columns(); track c.id) {
+            <th class="muni">
+              <span>{{ i18n.name(c.entity.naziv) }}</span>
+              <button type="button" class="remove" (click)="store.toggleCompare(c.id)"
+                      [attr.aria-label]="i18n.t('compareRemove')" [title]="i18n.t('compareRemove')">✕</button>
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="section"><th [attr.colspan]="columns().length + 1">{{ i18n.t('compareBasics') }}</th></tr>
+        <tr>
+          <td class="name">{{ i18n.t('population') }}</td>
+          @for (c of columns(); track c.id) { <td class="num"><strong>{{ i18n.num(c.entity.stanovnika) }}</strong></td> }
+        </tr>
+        @if (store.previousYear()) {
+          <tr>
+            <td class="name">{{ i18n.t('modeChange', { prev: store.previousYear()! }) }}</td>
+            @for (c of columns(); track c.id) {
+              <td class="num">
+                @if (c.change !== null) {
+                  <span [class.up]="c.change > 0" [class.down]="c.change < 0">{{ i18n.signedPct(c.change) }}</span>
+                } @else { <span class="na">–</span> }
+              </td>
+            }
+          </tr>
+        }
+        <tr>
+          <td class="name">{{ i18n.t('area') }}</td>
+          @for (c of columns(); track c.id) { <td class="num">{{ i18n.num(c.entity.povrsinaKm2) }} km²</td> }
+        </tr>
+        <tr>
+          <td class="name">{{ i18n.t('density') }}</td>
+          @for (c of columns(); track c.id) { <td class="num">{{ i18n.num(c.entity.gustina, 1) }}</td> }
+        </tr>
+        @if (columns()[0].entity.prosjecnaStarost !== null) {
+          <tr>
+            <td class="name">{{ i18n.t('avgAge') }}</td>
+            @for (c of columns(); track c.id) { <td class="num">{{ c.entity.prosjecnaStarost !== null ? i18n.num(c.entity.prosjecnaStarost, 1) : '–' }}</td> }
+          </tr>
+        }
+
+        @for (t of tables(); track t.topic) {
+          <tr class="section"><th [attr.colspan]="columns().length + 1">{{ topicTitle(t.topic) }}</th></tr>
+          @for (row of t.rows; track row.key) {
+            <tr>
+              <td class="name"><span class="name-inner"><i class="swatch" [style.background]="row.color"></i>{{ i18n.name(row.key) }}</span></td>
+              @for (cell of row.cells; track $index) {
+                <td class="num share">
+                  <span class="bar" [style.width.%]="cell.procenat" [style.background]="row.color"></span>
+                  <strong>{{ i18n.pct(cell.procenat) }}</strong>
+                  <small>{{ i18n.num(cell.broj) }}</small>
+                </td>
+              }
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+}
