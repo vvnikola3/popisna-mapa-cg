@@ -4,7 +4,7 @@
     <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
   </button>
 
-  <div class="brand">
+  <div class="brand" role="link" tabindex="0" (click)="store.showRegion()" (keydown.enter)="store.showRegion()">
     <span class="logo" aria-hidden="true">
       <svg viewBox="0 0 32 32" width="30" height="30">
         <rect x="1" y="1" width="30" height="30" rx="7" fill="#fff"/>
@@ -106,8 +106,16 @@
   </ul>
 </nav>
 
-<main class="layout">
-  <app-panel class="side" id="details" />
-  <app-map class="main-map" />
-</main>
+<!-- the region map stays on top of the country for a moment and fades out (no blank frame in between) -->
+<div class="stage">
+  @if (!store.regionView()) {
+    <main class="layout">
+      <app-panel class="side" id="details" />
+      <app-map class="main-map" />
+    </main>
+  }
+  @if (regionShown()) {
+    <app-region class="region" [class.fading]="!store.regionView()" />
+  }
+</div>
 </div>

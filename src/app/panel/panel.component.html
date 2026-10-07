@@ -4,6 +4,8 @@
 @if (!store.compareMode() && entity(); as e) {
   <div class="head">
     <nav class="crumbs">
+      <button type="button" (click)="store.showRegion()">{{ i18n.t('home') }}</button>
+      <span class="sep">›</span>
       @if (isCountry()) {
         <span>{{ countryName() }}</span>
       } @else {

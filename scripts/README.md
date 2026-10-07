@@ -11,6 +11,7 @@ i `public/data/`, svoj `teritorije.json` i svoje skripte za popise.
 
 | Skripta | Izlaz | Opis |
 |---|---|---|
+| `build-region.js` | `public/data/region.json` | Mapa regiona za početnu stranicu: Natural Earth 1:50m (javno dobro), Kosovo spojeno sa Srbijom, susjedne države kao siva pozadina. |
 | `build-geo.js` | `geo-<godina>.json`, `teritorije.json` | Granice opština za svaku godinu popisa, izvedene iz registra teritorija. Zeta (OSM relacija 10147976) se isijeca iz stare Podgorice. Svakoj opštini se računa tačka za naziv. |
 | `fetch-popstat.js` | `sources/me/popstat-<godina>-<tema>.json` | Jednokratno preuzimanje tabela sa pop-stat.mashke.org (nacionalnost 1961–1991, vjera 1991) uz provjeru zbirova. |
 | `build-census-historical.js` | `popis-1948.json` … `popis-1991.json` | Broj stanovnika: MONSTAT, Popis 2003, Knjiga 9 (1948 i 1953 preračunato na granice iz 2003); nacionalnost i vjera: pop-stat. |

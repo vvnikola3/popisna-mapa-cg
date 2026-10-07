@@ -1,0 +1,26 @@
+<aside class="intro">
+  <h2>{{ i18n.t('regionTitle') }}</h2>
+  <p class="lead">{{ i18n.t('regionLead') }}</p>
+
+  <ul class="countries">
+    @for (c of countries; track c.code) {
+      <li>
+        <button type="button" [disabled]="!c.available" [class.hover]="hovered() === c.code"
+                (mouseenter)="hovered.set(c.code)" (mouseleave)="hovered.set(null)" (click)="open(c.code)">
+          <app-flag [code]="c.code" [size]="28" />
+          <span class="cname">{{ name(c) }}</span>
+          @if (c.available) {
+            <span class="years">{{ c.dataYears[0] }}–{{ c.dataYears[c.dataYears.length - 1] }}</span>
+            <span class="go" aria-hidden="true">›</span>
+          } @else {
+            <em>{{ i18n.t('soon') }}</em>
+          }
+        </button>
+      </li>
+    }
+  </ul>
+</aside>
+
+<div class="map-wrap" [class.leaving]="leaving()">
+  <div #mapDiv class="map"></div>
+</div>

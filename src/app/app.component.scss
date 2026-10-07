@@ -43,6 +43,7 @@
   align-items: center;
   gap: 12px;
   min-width: 0;
+  cursor: pointer; // back to the region map
 
   .logo { flex: none; line-height: 0; }
 
@@ -275,6 +276,48 @@
 
 // ------------------------------------------------------------------ layout
 
+.region {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+// region <-> country: the country is drawn underneath right away and the region
+// fades out on top of it; going back, the region fades in over the country
+.stage {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.region {
+  animation: region-in 0.35s ease-out;
+
+  &.fading {
+    position: absolute;
+    inset: 0;
+    z-index: 1500;
+    pointer-events: none;
+    animation: region-out 0.45s ease-in forwards;
+  }
+}
+
+@keyframes region-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes region-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .region, .region.fading { animation: none; }
+}
+
 .layout {
   display: grid;
   grid-template-columns: minmax(380px, 42%) 1fr;
@@ -311,6 +354,7 @@
   .country-name { display: none; }
 
   .body { display: contents; }
+  .stage { display: block; }
 
   .layout {
     display: flex;

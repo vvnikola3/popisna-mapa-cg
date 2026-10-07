@@ -83,6 +83,7 @@ src/app/core/         prevodi (ćirilica / latinica / EN), transliteracija, zast
   ([publikacije.stat.gov.rs](https://publikacije.stat.gov.rs/G1953/Pdf/G19534001.pdf)), procjena po današnjim
 - **Pol i starost 1991:** Savezni zavod za statistiku, knjiga „Stanovništvo prema starosti i polu“,
   digitalizovana na [publikacije.stat.gov.rs](https://publikacije.stat.gov.rs/G1991/Pdf/G19914023.pdf)
+- **Granice država (početna mapa):** [Natural Earth](https://www.naturalearthdata.com), javno dobro
 - **Granice opština:** [simplemaps](https://simplemaps.com/gis/country/me), licenca
   [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 - **Granica opštine Zeta:** © [OpenStreetMap](https://www.openstreetmap.org/copyright)

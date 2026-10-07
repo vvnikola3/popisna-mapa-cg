@@ -13,8 +13,6 @@
 
 ## Nova faza – region
 
-- [ ] **Početna mapa regiona**: posjetilac sam bira državu klikom na mapu ili sa strane,
-  pa se otvara mapa te države (umjesto izbora države po IP adresi)
 - [ ] **Srbija** (podaci, granice, sopstvene grupe; boje po zastavi). Zbog velikog broja opština:
   - tab „Opštine“: sve opštine na mapi, naziv i podaci tek na hover
   - tab „Okruzi“: mapa okruga, klik na okrug otvara mapu okruga sa njegovim opštinama
@@ -26,6 +24,8 @@
 - Kombinacije kategorija (npr. Crnogorci po vjeri)
 
 ## Urađeno
+
+- [x] Početna mapa regiona (Crna Gora, Srbija sa Kosovom, BiH, Hrvatska, Sj. Makedonija); klikabilna samo Crna Gora
 
 - [x] Poređenje opština (do 4, jedna pored druge; link ?poredi=…)
 - [x] Google Search Console – domen verifikovan (TXT na Porkbunu), sitemap poslat

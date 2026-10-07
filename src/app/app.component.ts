@@ -1,6 +1,7 @@
-import { Component, ElementRef, HostListener, inject, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, effect, inject, signal } from '@angular/core';
 import { MapComponent } from './map/map.component';
 import { PanelComponent } from './panel/panel.component';
+import { RegionComponent } from './region/region.component';
 import { FlagComponent } from './core/flag.component';
 import { I18n, LANGUAGES, Lang } from './core/i18n.service';
 import { CensusStore } from './census/census.store';
@@ -9,10 +10,13 @@ import { UrlState } from './core/url-state.service';
 
 type Menu = 'country' | 'lang';
 
+/** Keep in sync with the region fade-out in app.component.scss. */
+const REGION_FADE_MS = 450;
+
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [MapComponent, PanelComponent, FlagComponent],
+  imports: [MapComponent, PanelComponent, FlagComponent, RegionComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
@@ -28,6 +32,18 @@ export class AppComponent {
   /** Wide screens: the menu is a column next to the content, open from the start. */
   readonly desktop = typeof matchMedia !== 'undefined' && matchMedia('(min-width: 861px)').matches;
   readonly menuOpen = signal(this.desktop);
+  /** The region map, kept a little longer than regionView so it can fade out over the country. */
+  readonly regionShown = signal(true);
+  private fadeTimer?: ReturnType<typeof setTimeout>;
+
+  constructor() {
+    effect(() => {
+      const region = this.store.regionView();
+      clearTimeout(this.fadeTimer);
+      if (region) this.regionShown.set(true);
+      else this.fadeTimer = setTimeout(() => this.regionShown.set(false), REGION_FADE_MS);
+    });
+  }
   readonly openDropdown = signal<Menu | null>(null);
 
   readonly menu = [
@@ -38,13 +54,20 @@ export class AppComponent {
   ] as const;
 
   isActive(key: string) {
+    if (this.store.regionView()) return false;
     return key === 'menuCompare' ? this.store.compareMode() : key === 'menuMap' && !this.store.compareMode();
   }
 
   openMenuItem(key: string, soon: boolean) {
     if (soon) return;
-    if (key === 'menuCompare') this.store.startCompare();
-    if (key === 'menuMap') this.store.exitCompare();
+    if (key === 'menuCompare') {
+      this.store.regionView.set(false);
+      this.store.startCompare();
+    }
+    if (key === 'menuMap') {
+      this.store.exitCompare();
+      this.store.regionView.set(false);
+    }
     if (!this.desktop) this.menuOpen.set(false);
   }
 
@@ -63,7 +86,7 @@ export class AppComponent {
 
   chooseCountry(country: Country) {
     if (!country.available) return;
-    this.store.selectCountry(country.code);
+    this.store.openCountry(country.code);
     this.openDropdown.set(null);
   }
 

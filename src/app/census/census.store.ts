@@ -20,6 +20,8 @@ export const MAX_COMPARE = 4;
 @Injectable({ providedIn: 'root' })
 export class CensusStore {
   readonly country = signal<Country>(COUNTRIES[0]);
+  /** Start page: map of the region where the visitor picks a country. */
+  readonly regionView = signal(true);
   readonly years = signal<Record<number, YearData>>({});
   readonly territories = signal<Territory[]>([]);
   /** Censuses whose figures refer to later borders (e.g. 1948 recalculated to 2003). */
@@ -76,6 +78,20 @@ export class CensusStore {
       console.error('Could not load census data', e);
       this.error.set(true);
     }
+  }
+
+  /** Opens a country's census map (from the region map or the country dropdown). */
+  openCountry(code: CountryCode) {
+    if (!COUNTRIES.find(c => c.code === code)?.available) return;
+    this.selectCountry(code);
+    this.regionView.set(false);
+  }
+
+  showRegion() {
+    this.exitCompare();
+    this.pinnedId.set(null);
+    this.hoveredId.set(null);
+    this.regionView.set(true);
   }
 
   selectCountry(code: CountryCode) {

@@ -85,6 +85,10 @@ export class UrlState {
     effect(() => {
       const pinned = this.store.pinnedId();
       const name = pinned ? this.store.current()?.census.opstine[pinned]?.naziv : null;
+      if (this.store.regionView()) {
+        document.title = `${this.i18n.t('appTitle')} – ${this.i18n.t('appSubtitle')}`;
+        return;
+      }
       const place = this.i18n.name(name ?? this.store.country().name);
       document.title = `${place} – ${this.modeLabel()} ${this.store.year()} · ${this.i18n.t('appTitle')}`;
     });
@@ -128,7 +132,8 @@ export class UrlState {
     if (!country) return null;
 
     const c = COUNTRIES.find(x => x.code === country && x.available);
-    if (c) this.store.selectCountry(c.code);
+    if (!c) return null; // unknown country: stay on the region map
+    this.store.openCountry(c.code);
     if (year) this.store.selectYear(Number(year));
     const m = (Object.keys(MODE_SLUGS) as MapMode[]).find(k => MODE_SLUGS[k] === mode);
     if (m && (m !== 'change' || this.store.previousYear())) this.store.setMode(m);
@@ -169,6 +174,7 @@ export class UrlState {
   }
 
   private buildUrl(): string {
+    if (this.store.regionView()) return BASE;
     const parts = [this.store.country().code, String(this.store.year()), MODE_SLUGS[this.store.mode()]];
     const pinned = this.store.pinnedId();
     const name = pinned ? this.store.current()?.census.opstine[pinned]?.naziv : null;
