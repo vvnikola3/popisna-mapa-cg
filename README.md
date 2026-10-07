@@ -2,8 +2,8 @@
 
 Interaktivna mapa rezultata popisa stanovništva Crne Gore po opštinama: nacionalna,
 vjerska i jezička struktura, broj stanovnika i promjena između popisa, sa timeline-om
-svih popisa od 1948. do 2023. (za 1948. samo broj stanovnika).
-Ćirilica, latinica i engleski; radi i na telefonu. Planirane su i druge države regiona.
+svih popisa od 1948. do 2023. (za 1948. samo broj stanovnika). Tu je i Sjeverna Makedonija
+(popisi 2002. i 2021.). Ćirilica, latinica i engleski; radi i na telefonu. Planirane su i druge države regiona.
 
 Aplikacija je statična (Angular + Leaflet + d3): podaci se unaprijed pripremaju
 skriptama u `scripts/` i servira ih se kao JSON iz `public/data/<država>/`.
@@ -66,7 +66,8 @@ a `BASE_HREF` u workflow-u bi morao biti `/popisna-mapa-cg/`.
 
 ```
 public/data/me/       geo-<godina>.json (granice), popis-<godina>.json (podaci), teritorije.json
-scripts/              priprema podataka iz MONSTAT PDF-ova i OSM-a – vidi scripts/README.md
+public/data/mk/       isto za Sjevernu Makedoniju
+scripts/              priprema podataka iz MONSTAT PDF-ova, OSM-a i MakStat-a – vidi scripts/README.md
 src/app/census/       model podataka, grupe, skale boja, države, zajedničko stanje (store)
 src/app/map/          mapa, timeline, izbor prikaza i legenda, kartica na hover / traka na dodir
 src/app/panel/        lijevi panel sa pie chartovima i tabelama
@@ -86,9 +87,15 @@ src/app/core/         prevodi (ćirilica / latinica / EN), transliteracija, zast
 - **Granice država (početna mapa):** [Natural Earth](https://www.naturalearthdata.com), javno dobro
 - **Granice opština:** [simplemaps](https://simplemaps.com/gis/country/me), licenca
   [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+- **Sjeverna Makedonija – popis 2002. i 2021.:** [MakStat](https://makstat.stat.gov.mk), baza Državnog zavoda
+  za statistiku (PX-Web API); 2021: nacionalnost, vjera, maternji jezik, starost i pol; 2002: nacionalnost
+  (osam grupa), starost i pol
+- **Granice opština Sjeverne Makedonije:** [geoBoundaries](https://www.geoboundaries.org) (ADM2, 84 opštine),
+  licenca [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 - **Granica opštine Zeta:** © [OpenStreetMap](https://www.openstreetmap.org/copyright)
   contributors, licenca [ODbL](https://opendatacommons.org/licenses/odbl/)
 
-Oba izvora granica zahtijevaju navođenje – ono je prikazano u uglu mape.
-Granice su izmijenjene: Zeta je isječena iz Podgorice, a za ranije popise su spojene
-opštine koje su kasnije razdvojene (detalji u `scripts/README.md`).
+Svi izvori granica zahtijevaju navođenje – ono je prikazano u uglu mape.
+Granice su izmijenjene: Zeta je isječena iz Podgorice, za ranije popise su spojene opštine koje su
+kasnije razdvojene (Crna Gora), a za popis 2021. su Drugovo, Oslomej, Vraneštica i Zajas spojeni sa
+Kičevom (Sjeverna Makedonija). Detalji su u `scripts/README.md`.

@@ -221,7 +221,7 @@
   }
 
   <p class="source">
-    {{ i18n.t('source') }}: {{ i18n.name(source()) }}. {{ i18n.t('areaNote') }}
+    {{ i18n.t('source') }}: {{ i18n.name(source()) }}. {{ areaNote() }}
     @if (!isCountry() && censusNote(); as n) { <br>{{ i18n.t('censusNote') }}: {{ n }} }
   </p>
 }

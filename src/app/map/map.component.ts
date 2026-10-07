@@ -3,7 +3,7 @@ import * as L from 'leaflet';
 import { CensusStore, GroupChange } from '../census/census.store';
 import {
   CHANGE_SCALE, DENSITY_SCALE, GroupShare, MapMode, NO_DATA_COLOR, POPULATION_SCALE, Scale, Topic, YearData,
-  binIndex, groupShares, groupsFor, isLight, isTopic, lighten, majority, majorityColor, shareScale
+  binIndex, isLight, isTopic, lighten, majority, majorityColor, shareScale
 } from '../census/census.model';
 import { I18n } from '../core/i18n.service';
 
@@ -23,6 +23,9 @@ type CardBody =
   | { kind: 'population' }
   | { kind: 'density' }
   | { kind: 'change' };
+
+/** More municipalities than this: names only when zoomed in. */
+const DENSE_LABELS = 30;
 
 @Component({
   selector: 'app-map',
@@ -51,6 +54,9 @@ export class MapComponent implements OnInit, OnDestroy {
   /** Once the user pans or zooms, resizing no longer re-fits the country. */
   private userMoved = false;
   private attribution = '';
+  /** Zoom level at which the whole country fits the map. */
+  private fitZoom = 0;
+  private labelCount = 0;
 
   readonly timeline = computed(() => {
     const { censusYears, dataYears } = this.store.country();
@@ -94,7 +100,7 @@ export class MapComponent implements OnInit, OnDestroy {
     if (!isTopic(mode)) return null;
     // only groups this census recorded (no Bosniaks before 2003, no Yugoslavs after 1991…)
     const current = this.store.current();
-    return groupsFor(mode).filter(g => this.store.recorded(current, mode, g.key)).map(g =>({ key: g.key, color: g.color, light: lighten(g.color, 0.5), special: !!g.special }));
+    return this.store.groups(mode).filter(g => this.store.recorded(current, mode, g.key)).map(g =>({ key: g.key, color: g.color, light: lighten(g.color, 0.5), special: !!g.special }));
   });
 
   /** Classed legend for population, change, or the share of the focused group. */
@@ -112,7 +118,7 @@ export class MapComponent implements OnInit, OnDestroy {
       ];
     }
     if (focus) {
-      const group = groupsFor(mode).find(g => g.key === focus)!;
+      const group = this.store.groups(mode).find(g => g.key === focus)!;
       return this.scaleItems(shareScale(group.color), v => this.i18n.pct(v, 0));
     }
     return null;
@@ -128,7 +134,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     let body: CardBody;
     if (isTopic(mode) && this.store.hasTopic(mode)) {
-      const shares = groupShares(entity, mode);
+      const shares = this.store.shares(entity, mode);
       const focused = focus ? shares.find(s => s.key === focus) : undefined;
       body = focused
         ? { kind: 'focus', topic: mode, share: focused, change: this.store.groupChange(id, mode, focused.key) }
@@ -139,7 +145,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     const accent =
       body.kind === 'focus' ? body.share.color
-        : body.kind === 'groups' ? majority(groupShares(entity, body.topic)).color
+        : body.kind === 'groups' ? majority(this.store.shares(entity, body.topic)).color
           : '#c8102e';
     return { entity, body, accent, change: this.store.change(id), previous: this.store.compare(id) };
   });
@@ -181,6 +187,7 @@ export class MapComponent implements OnInit, OnDestroy {
       maxZoom: 11,
     });
     this.map.attributionControl.setPrefix(false);
+    this.map.on('zoomend', () => this.syncLabels());
     this.map.on('dragstart zoomstart', () => {
       if (!this.fitting) this.userMoved = true;
     });
@@ -271,6 +278,8 @@ export class MapComponent implements OnInit, OnDestroy {
     this.map.fitBounds(this.layer.getBounds(), { paddingTopLeft: [30, 12], paddingBottomRight: [16, 28], animate: false });
     this.fitting = false;
     this.fitted = true;
+    this.fitZoom = this.map.getZoom();
+    this.syncLabels();
   }
 
   private renderLabels() {
@@ -291,18 +300,34 @@ export class MapComponent implements OnInit, OnDestroy {
           }),
         });
       })
-    ).addTo(this.map);
+    );
+    this.labelCount = data.geo.features.length;
+    this.syncLabels();
   }
 
-  /** Required credits for the boundary data (simplemaps is CC BY 4.0, OSM is ODbL). */
+  /**
+   * With many municipalities (80 in North Macedonia) the names overlap, so they appear
+   * only once the map is zoomed in; the hover card / panel name the rest.
+   */
+  private syncLabels() {
+    if (!this.map || !this.labels) return;
+    const show = this.labelCount <= DENSE_LABELS || this.map.getZoom() >= this.fitZoom + 1.25;
+    if (show) this.labels.addTo(this.map);
+    else this.labels.remove();
+  }
+
+  /** Required credits for the boundary data (simplemaps and geoBoundaries are CC BY 4.0, OSM is ODbL). */
   private updateAttribution() {
     if (!this.map) return;
     if (this.attribution) this.map.attributionControl.removeAttribution(this.attribution);
-    this.attribution =
-      `${this.i18n.t('boundaries')}: <a href="https://simplemaps.com/gis/country/me" target="_blank" rel="noopener">simplemaps</a>, ` +
-      '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors · ' +
-      `${this.i18n.t('data')}: <a href="https://www.monstat.org" target="_blank" rel="noopener">MONSTAT</a>, ` +
-      '<a href="https://pop-stat.mashke.org" target="_blank" rel="noopener">pop-stat</a>';
+    const link = (url: string, text: string) => `<a href="${url}" target="_blank" rel="noopener">${text}</a>`;
+    const boundaries = `${this.i18n.t('boundaries')}: `;
+    const data = `${this.i18n.t('data')}: `;
+    this.attribution = this.store.country().code === 'mk'
+      ? boundaries + link('https://www.geoboundaries.org', 'geoBoundaries') + ' · ' + data + link('https://makstat.stat.gov.mk', 'MakStat')
+      : boundaries + link('https://simplemaps.com/gis/country/me', 'simplemaps') + ', ' +
+        '© ' + link('https://www.openstreetmap.org/copyright', 'OpenStreetMap') + ' contributors · ' +
+        data + link('https://www.monstat.org', 'MONSTAT') + ', ' + link('https://pop-stat.mashke.org', 'pop-stat');
     this.map.attributionControl.addAttribution(this.attribution);
   }
 
@@ -318,7 +343,7 @@ export class MapComponent implements OnInit, OnDestroy {
     }
     const focus = this.store.focusGroup();
     if (!focus || !this.store.hasTopic(mode)) return '';
-    const share = groupShares(entity, mode).find(s => s.key === focus)!;
+    const share = this.store.shares(entity, mode).find(s => s.key === focus)!;
     return this.i18n.pct(share.procenat);
   }
 
@@ -359,7 +384,7 @@ export class MapComponent implements OnInit, OnDestroy {
     }
 
     if (!this.store.hasTopic(mode)) return NO_DATA_COLOR;
-    const shares = groupShares(entity, mode);
+    const shares = this.store.shares(entity, mode);
     const focus = this.store.focusGroup();
     if (focus) {
       const share = shares.find(s => s.key === focus)!;

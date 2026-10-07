@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { CensusStore, MAX_COMPARE } from '../census/census.store';
-import { CensusEntity, OTHER_KEY, TOPICS, Topic, groupShares } from '../census/census.model';
+import { CensusEntity, OTHER_KEY, TOPICS, Topic } from '../census/census.model';
 import { I18n } from '../core/i18n.service';
 
 interface Column {
@@ -58,7 +58,7 @@ export class CompareComponent {
     return TOPICS.filter(t => this.store.hasTopic(t))
       .sort((a, b) => Number(b === mode) - Number(a === mode))
       .map(topic => {
-        const shares = cols.map(c => groupShares(c.entity, topic));
+        const shares = cols.map(c => this.store.shares(c.entity, topic));
         const rows = shares[0]
           .filter(g => g.key === OTHER_KEY || this.store.recorded(this.store.current(), topic, g.key))
           .map(g => ({

@@ -6,8 +6,8 @@ Skripte generišu sve fajlove u `public/data/<država>/` iz izvora u `sources/<d
 npm run data:build
 ```
 
-Trenutno postoji samo Crna Gora (`me`). Nova država dobija svoj folder u `sources/`
-i `public/data/`, svoj `teritorije.json` i svoje skripte za popise.
+Trenutno postoje Crna Gora (`me`) i Sjeverna Makedonija (`mk`, vidi dolje). Nova država dobija svoj folder u
+`sources/` i `public/data/`, svoj `teritorije.json` i svoje skripte za popise.
 
 | Skripta | Izlaz | Opis |
 |---|---|---|
@@ -18,6 +18,11 @@ i `public/data/`, svoj `teritorije.json` i svoje skripte za popise.
 | `build-census-2003.js` | `popis-2003.json` | MONSTAT, Popis 2003 – Knjiga 3 (ćirilica). |
 | `build-census-2011.js` | `popis-2011.json` | MONSTAT, Popis 2011 – stanovništvo po opštinama. |
 | `build-census-2023.js` | `popis-2023.json` | MONSTAT, Popis 2023 – saopštenja I i II. |
+
+| `fetch-makstat.js` | `sources/mk/makstat-*.json` | Jednokratno preuzimanje MakStat tabela (Sjeverna Makedonija) preko PX-Web API-ja; `npm run data:fetch-mk`. |
+| `build-geo-mk.js` | `mk/geo-2002.json`, `geo-2021.json`, `teritorije.json`, `sources/mk/povrsine.json` | Granice opština: geoBoundaries ADM2 (84 opštine = 2002); za 2021. su Drugovo, Oslomej, Vraneštica i Zajas spojeni sa Kičevom. Računa i površine. |
+| `build-census-mk.js` | `mk/popis-2002.json`, `popis-2021.json` | MakStat: broj stanovnika, pol, starost, nacionalnost (2002: 8 grupa), 2021 još vjera i maternji jezik. |
+| `geo-helpers.js` | – | Zajednički dio skripti za granice (isjecanje sitnih dijelova, tačka za naziv, upis `geo-<godina>.json`). |
 
 Skripte za popis zahtijevaju da `geo-*.json` već postoji (zbog površine).
 Godine popisa sa podacima su u `registry.js` (`CENSUS_YEARS`) i u `src/app/census/countries.ts`.
@@ -35,6 +40,27 @@ Iz toga se:
   za 1961–1981 i Andrijevica → Ivangrad);
 - u aplikaciji određuje šta je uporedivo između dva popisa (napomena „granice
   promijenjene" / „opština nije postojala").
+
+## Sjeverna Makedonija (`sources/mk/`)
+
+- `makstat-<godina>-<tema>.json` – tabele iz [MakStat](https://makstat.stat.gov.mk) (Državni zavod za statistiku,
+  PX-Web API, bez ključa, traži `User-Agent`; dozvoljeno je samo nekoliko zahtjeva u nekoliko sekundi, pa
+  skripta čeka na HTTP 429). Svaki fajl ima metapodatke tabele i redove `[opština, …, vrijednost]`;
+  „-“ u izvoru je nula. `makstat-2021-nazivi-mk.json` su makedonski (ćirilični) nazivi opština.
+- `geoboundaries-mkd-adm2.json` – [geoBoundaries](https://www.geoboundaries.org) ADM2, uprošćena verzija
+  (CC BY 4.0), 84 opštine = stanje 2002.
+- `teritorije.json` – registar: `id` (`MK` + redni broj opštine u tabeli popisa 2002), `naziv` (latinica,
+  srpski pravopis), `cirilica` i `engleski` (aplikacija ih koristi umjesto transliteracije), `grad`
+  (deset opština Grada Skoplja). Opštine ukinute 2013. imaju `ukinuta` i `pripojenaU` – za popis 2021.
+  se spajaju u Kičevo (u Crnoj Gori je obrnuto: `osnovana` / `izdvojenaIz`).
+- `povrsine.json` – generiše `build-geo-mk.js`. **Površine opština su izračunate iz granica**, jer baza
+  nema tabelu površina; zato su malo manje od zvaničnih (koje uključuju jezera), a ukupna površina države
+  (25.713 km²) je zvanična i veća je od zbira opština.
+
+Provjere: zbir polova, starosnih grupa i svih kategorija = ukupno za svaku opštinu, zbir opština = država,
+zbir deset skopskih opština = Grad Skoplje. U popisu 2021. za 7,2% stanovnika podaci su iz administrativnih
+registara (nacionalnost, vjera i jezik nepoznati) – prikazano kao „Nepoznato“. Prosječna starost nije u bazi.
+Po opštinama 2002. nema vjere ni maternjeg jezika (vidi TODO.md).
 
 ## Svaki popis sadrži
 

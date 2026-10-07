@@ -1,7 +1,7 @@
 import { Injectable, effect, inject, untracked } from '@angular/core';
 import { CensusStore } from '../census/census.store';
 import { COUNTRIES } from '../census/countries';
-import { MapMode, TOPICS, Topic, groupsFor } from '../census/census.model';
+import { MapMode, TOPICS, Topic } from '../census/census.model';
 import { I18n } from './i18n.service';
 
 /** GoatCounter's script (index.html) – absent on localhost and when blocked. */
@@ -168,7 +168,7 @@ export class UrlState {
     }
     const mode = this.store.mode();
     if (req.group && (TOPICS as string[]).includes(mode)) {
-      const group = groupsFor(mode as Topic).find(g => slugify(g.key) === req.group);
+      const group = this.store.groups(mode as Topic).find(g => slugify(g.key) === req.group);
       if (group && this.store.recorded(this.store.current(), mode as Topic, group.key)) this.store.focusGroup.set(group.key);
     }
   }

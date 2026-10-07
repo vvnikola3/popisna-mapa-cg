@@ -28,5 +28,12 @@ export const COUNTRIES: Country[] = [
   { code: 'rs', name: 'Srbija', available: false, censusYears: [], dataYears: [] },
   { code: 'ba', name: 'Bosna i Hercegovina', available: false, censusYears: [], dataYears: [] },
   { code: 'hr', name: 'Hrvatska', available: false, censusYears: [], dataYears: [] },
-  { code: 'mk', name: 'Sjeverna Makedonija', available: false, censusYears: [], dataYears: [] },
+  {
+    code: 'mk',
+    name: 'Sjeverna Makedonija',
+    available: true,
+    // 1948–1994 are by settlements only in the database – municipalities have 2002 and 2021
+    censusYears: [1948, 1953, 1961, 1971, 1981, 1991, 1994, 2002, 2021],
+    dataYears: [2002, 2021],
+  },
 ];

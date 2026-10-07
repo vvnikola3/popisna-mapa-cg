@@ -1,8 +1,9 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { I18n } from '../core/i18n.service';
 import { COUNTRIES, Country, CountryCode } from './countries';
 import {
   CensusEntity, CensusYear, Comparison, MapMode, OTHER_KEY, Territory, TerritoryRegistry, Topic, YearData,
-  groupShares, isTopic
+  Group, GroupShare, groupShares, groupsFor, isTopic
 } from './census.model';
 
 /** How a group changed since the previous census. */
@@ -19,6 +20,7 @@ export const MAX_COMPARE = 4;
 /** Shared UI state: selected country and census, map mode, hovered / pinned municipality. */
 @Injectable({ providedIn: 'root' })
 export class CensusStore {
+  private readonly i18n = inject(I18n);
   readonly country = signal<Country>(COUNTRIES[0]);
   /** Start page: map of the region where the visitor picks a country. */
   readonly regionView = signal(true);
@@ -71,6 +73,7 @@ export class CensusStore {
           return { year, census, geo } as YearData;
         }),
       ]);
+      this.i18n.registerNames(registry.opstine);
       this.territories.set(registry.opstine);
       this.territoryYears.set(registry.teritorijaPopisa ?? {});
       this.years.set(Object.fromEntries(loaded.map(d => [d.year, d])));
@@ -123,6 +126,16 @@ export class CensusStore {
     const focus = this.focusGroup();
     const topic = this.mode();
     if (loaded && focus && isTopic(topic) && !this.recorded(this.current(), topic, focus)) this.focusGroup.set(null);
+  }
+
+  /** Display groups of a topic in the selected country. */
+  groups(topic: Topic): Group[] {
+    return groupsFor(this.country().code, topic);
+  }
+
+  /** An entity's shares collapsed into the selected country's groups. */
+  shares(entity: CensusEntity, topic: Topic): GroupShare[] {
+    return groupShares(entity, topic, this.country().code);
   }
 
   /** Whether a census has data for a topic (1948/1953 have no ethnicity, religion only from 1991…). */
@@ -190,7 +203,13 @@ export class CensusStore {
     const territory = this.territoryYear(year);
     const byId = this.byId();
     let unit = byId[id];
-    while (unit?.osnovana && unit.osnovana > territory && unit.izdvojenaIz) unit = byId[unit.izdvojenaIz];
+    // founded later: back into the municipality it was carved out of; abolished earlier: into the one it was merged into
+    for (;;) {
+      const next = unit?.osnovana && unit.osnovana > territory ? unit.izdvojenaIz
+        : unit?.ukinuta && unit.ukinuta <= territory ? unit.pripojenaU : undefined;
+      if (!next || !byId[next]) break;
+      unit = byId[next];
+    }
     return unit?.id ?? id;
   }
 
@@ -238,8 +257,8 @@ export class CensusStore {
     const cmp = this.compare(id);
     if (!now || cmp.status !== 'same' || !this.hasTopic(topic, this.previous())) return null;
     if (!this.recorded(this.previous(), topic, group)) return null;
-    const current = groupShares(now, topic).find(s => s.key === group);
-    const previous = groupShares(cmp.entity, topic).find(s => s.key === group);
+    const current = this.shares(now, topic).find(s => s.key === group);
+    const previous = this.shares(cmp.entity, topic).find(s => s.key === group);
     if (!current || !previous) return null;
     return {
       share: current.procenat - previous.procenat,
@@ -255,6 +274,6 @@ export class CensusStore {
   recorded(data: YearData | null, topic: Topic, group: string): boolean {
     if (!data) return false;
     if (group === OTHER_KEY) return true;
-    return (groupShares(data.census.drzava, topic).find(s => s.key === group)?.broj ?? 0) > 0;
+    return (this.shares(data.census.drzava, topic).find(s => s.key === group)?.broj ?? 0) > 0;
   }
 }

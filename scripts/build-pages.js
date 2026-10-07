@@ -14,7 +14,10 @@ const { CENSUS_YEARS, loadRegistry, holderIn, territoryYear } = require('./regis
 const SITE = 'https://popisi.org';
 const DIST = path.resolve(process.argv[2] ?? path.join(__dirname, '..', 'dist', 'popisna-mapa-cg', 'browser'));
 const DATA = path.join(__dirname, '..', 'public', 'data');
-const COUNTRY = { code: 'me', name: 'Crna Gora', genitive: 'Crne Gore' };
+const COUNTRIES = [
+  { code: 'me', name: 'Crna Gora', genitive: 'Crne Gore' },
+  { code: 'mk', name: 'Sjeverna Makedonija', genitive: 'Sjeverne Makedonije' },
+];
 
 // keep in sync with MODE_SLUGS in src/app/core/url-state.service.ts
 const MODES = [
@@ -36,7 +39,7 @@ const signedPct = v => `${v > 0 ? '+' : v < 0 ? '−' : ''}${num(Math.abs(v), 1)
 const escape = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 /** Categories that are not a group of people in their own right. */
-const isResidual = name => /^(Ne želi|Neizjašnj|Nepoznato|Ostal|Maternji$|Regionaln)/.test(name);
+const isResidual = name => /^(Ne želi|Neizjašnj|Nepoznato|Ostal|Maternji$|Regionaln|Podaci iz administrativnih|Znakovni)/.test(name);
 
 function describe(mode, entity, place, year, previous) {
   if (mode.list) {
@@ -78,51 +81,56 @@ function personalise(html, { url, title, description }) {
 
 // ---------------------------------------------------------------- pages
 const template = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8');
-const registry = loadRegistry(COUNTRY.code);
-const years = CENSUS_YEARS[COUNTRY.code];
-const census = Object.fromEntries(years.map(y => [y, JSON.parse(fs.readFileSync(path.join(DATA, COUNTRY.code, `popis-${y}.json`), 'utf8'))]));
-
-/** Today's municipalities whose territory belonged to `id` in a census. */
-const coverage = (id, year) =>
-  registry.opstine.filter(u => holderIn(registry, u.id, territoryYear(registry, year)) === id).map(u => u.id).sort().join();
-
-/** Same territory in the previous census, or null when borders changed (see CensusStore.compare). */
-function previousOf(id, year) {
-  const prevYear = years[years.indexOf(year) - 1];
-  if (!prevYear) return null;
-  const prev = census[prevYear];
-  if (!id) return { year: prevYear, entity: prev.drzava };
-  if (!prev.opstine[id] || coverage(id, prevYear) !== coverage(id, year)) return null;
-  return { year: prevYear, entity: prev.opstine[id] };
-}
-
 const pages = [];
-for (const year of years) {
-  const data = census[year];
-  const places = [[null, data.drzava], ...Object.entries(data.opstine)];
-  for (const mode of MODES) {
-    if (mode.needsPrevious && years.indexOf(year) === 0) continue;
-    if (mode.list && !data.drzava[mode.list].length) continue; // not asked in this census
-    for (const [id, entity] of places) {
-      const place = !id ? COUNTRY.name : entity.danas ? `${entity.naziv} (danas ${entity.danas})` : entity.naziv;
-      const parts = [COUNTRY.code, String(year), mode.slug, ...(id ? [slugify(entity.naziv)] : [])];
-      // trailing slash: GitHub Pages serves dir/index.html there and 301-redirects the slash-less form
-      const url = `${SITE}/${parts.join('/')}/`;
-      const title = `${place} – ${mode.label}, popis ${year} · Popisna mapa`;
-      const description = describe(mode, entity, place, year, previousOf(id, year));
-      const dir = path.join(DIST, ...parts);
-      fs.mkdirSync(dir, { recursive: true });
-      fs.writeFileSync(path.join(dir, 'index.html'), personalise(template, { url, title, description }));
-      pages.push(url);
+
+function buildCountry(COUNTRY) {
+  const registry = loadRegistry(COUNTRY.code);
+  const years = CENSUS_YEARS[COUNTRY.code];
+  const census = Object.fromEntries(years.map(y => [y, JSON.parse(fs.readFileSync(path.join(DATA, COUNTRY.code, `popis-${y}.json`), 'utf8'))]));
+
+  /** Municipalities of the registry whose territory belonged to `id` in a census. */
+  const coverage = (id, year) =>
+    registry.opstine.filter(u => holderIn(registry, u.id, territoryYear(registry, year)) === id).map(u => u.id).sort().join();
+
+  /** Same territory in the previous census, or null when borders changed (see CensusStore.compare). */
+  function previousOf(id, year) {
+    const prevYear = years[years.indexOf(year) - 1];
+    if (!prevYear) return null;
+    const prev = census[prevYear];
+    if (!id) return { year: prevYear, entity: prev.drzava };
+    if (!prev.opstine[id] || coverage(id, prevYear) !== coverage(id, year)) return null;
+    return { year: prevYear, entity: prev.opstine[id] };
+  }
+
+  for (const year of years) {
+    const data = census[year];
+    const places = [[null, data.drzava], ...Object.entries(data.opstine)];
+    for (const mode of MODES) {
+      if (mode.needsPrevious && years.indexOf(year) === 0) continue;
+      if (mode.list && !data.drzava[mode.list].length) continue; // not asked in this census
+      for (const [id, entity] of places) {
+        const place = !id ? COUNTRY.name : entity.danas ? `${entity.naziv} (danas ${entity.danas})` : entity.naziv;
+        const parts = [COUNTRY.code, String(year), mode.slug, ...(id ? [slugify(entity.naziv)] : [])];
+        // trailing slash: GitHub Pages serves dir/index.html there and 301-redirects the slash-less form
+        const url = `${SITE}/${parts.join('/')}/`;
+        const title = `${place} – ${mode.label}, popis ${year} · Popisna mapa`;
+        const description = describe(mode, entity, place, year, previousOf(id, year));
+        const dir = path.join(DIST, ...parts);
+        fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(path.join(dir, 'index.html'), personalise(template, { url, title, description }));
+        pages.push(url);
+      }
     }
   }
 }
+
+for (const country of COUNTRIES) buildCountry(country);
 
 // the start page gets its canonical URL too
 fs.writeFileSync(path.join(DIST, 'index.html'), personalise(template, {
   url: `${SITE}/`,
   title: 'Popisna mapa – popisi stanovništva po opštinama · Пописна мапа',
-  description: `Interaktivna mapa popisa stanovništva ${COUNTRY.genitive} (${years.join(', ')}) po opštinama: nacionalnost, vjera, maternji jezik, broj stanovnika, gustina i promjene između popisa.`,
+  description: `Interaktivna mapa popisa stanovništva ${COUNTRIES.map(c => c.genitive).join(' i ')} po opštinama: nacionalnost, vjera, maternji jezik, broj stanovnika, gustina i promjene između popisa.`,
 }));
 
 // ---------------------------------------------------------------- sitemap + robots

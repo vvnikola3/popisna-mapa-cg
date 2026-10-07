@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { Territory } from '../census/census.model';
 import { toCyrillic } from './translit';
 
 /** Cyrillic and Latin share one Montenegrin dictionary; Cyrillic is transliterated from it. */
@@ -80,6 +81,7 @@ const ME = {
   loadError: 'Podaci nisu mogli biti učitani.',
   source: 'Izvor',
   areaNote: 'Površina: MONSTAT, Statistički godišnjak 2025 (Uprava za nekretnine); za Tuzi i Zetu privremena. Za ranije popise – zbir današnjih opština koje su tada bile u sastavu opštine.',
+  areaNoteMk: 'Površina opština: izračunata iz granica na mapi, pa je malo manja od zvanične, koja uključuje jezera; ukupno za državu: Državni zavod za statistiku. Za 2021. – zbir opština koje su tada bile u sastavu opštine.',
   boundaries: 'Granice',
   data: 'Podaci',
   share: 'Kopiraj link',
@@ -169,6 +171,7 @@ const EN: Record<Key, string> = {
   loadError: 'Could not load the data.',
   source: 'Source',
   areaNote: 'Area: MONSTAT, Statistical Yearbook 2025 (Real Estate Administration); provisional for Tuzi and Zeta. For earlier censuses – the sum of today’s municipalities that were part of it then.',
+  areaNoteMk: 'Municipal areas are calculated from the boundaries on the map, so they are slightly smaller than the official ones, which include lakes; country total: State Statistical Office. For 2021 – the sum of the municipalities that were part of it then.',
   boundaries: 'Boundaries',
   data: 'Data',
   share: 'Copy link',
@@ -207,6 +210,16 @@ const NAMES_EN: Record<string, string> = {
   Albanski: 'Albanian',
   Srpskohrvatski: 'Serbo-Croatian',
   Hrvatski: 'Croatian',
+  Makedonci: 'Macedonians',
+  Turci: 'Turks',
+  Romi: 'Roma',
+  Vlasi: 'Vlachs',
+  Hrišćani: 'Christians',
+  Nepoznato: 'Unknown',
+  Makedonski: 'Macedonian',
+  Turski: 'Turkish',
+  Romski: 'Romani',
+  Vlaški: 'Vlach',
   'Crna Gora': 'Montenegro',
   Srbija: 'Serbia',
   'Bosna i Hercegovina': 'Bosnia and Herzegovina',
@@ -221,6 +234,8 @@ const CENSUS_NOTES_EN: Record<string, string> = {
   'me-1961': 'Andrijevica was part of the municipality of Ivangrad (today Berane). “Muslims” were recorded in 1961 as “Muslims in the ethnic sense”. For Titograd, MONSTAT’s Book 9 gives 100 more inhabitants (72,319; total 471,994) than the Federal Statistical Office publication used here.',
   'me-1971': 'Andrijevica was part of the municipality of Ivangrad (today Berane).',
   'me-1981': 'Andrijevica was part of the municipality of Ivangrad (today Berane).',
+  'mk-2002': 'Only eight nationality groups were published by municipality (the rest are summed up as “Others”); religion and mother tongue by municipality are not in the State Statistical Office’s database.',
+  'mk-2021': 'For 7.2% of the population the data were taken from administrative sources, so their nationality, religion and mother tongue are unknown. Drugovo, Oslomej, Vraneštica and Zajas were merged into Kičevo in 2013, so 2021 has 80 municipalities (2002: 84).',
   'me-1991': 'The 1991 census (methodology of the time) counts citizens temporarily working abroad as residents, so comparisons with 2003 should be taken with caution.',
 };
 
@@ -229,9 +244,16 @@ const STORAGE_KEY = 'popis-lang';
 @Injectable({ providedIn: 'root' })
 export class I18n {
   readonly lang = signal<Lang>(this.restore());
+  /** Cyrillic / English names of the selected country's municipalities, keyed by their Latin name. */
+  private units = new Map<string, Territory>();
 
   constructor() {
     this.applyDocumentLang(this.lang());
+  }
+
+  /** Municipalities whose Cyrillic / English name is not the plain transliteration (North Macedonia). */
+  registerNames(territories: Territory[]) {
+    this.units = new Map(territories.filter(t => t.cirilica || t.engleski).map(t => [t.naziv, t]));
   }
 
   setLang(lang: Lang) {
@@ -253,8 +275,9 @@ export class I18n {
   /** A name from the data (municipality, census group, country) in the current script / language. */
   name(text: string): string {
     const lang = this.lang();
-    if (lang === 'en') return NAMES_EN[text] ?? text;
-    return lang === 'cyr' ? toCyrillic(text) : text;
+    const unit = this.units.get(text);
+    if (lang === 'en') return unit?.engleski ?? NAMES_EN[text] ?? text;
+    return lang === 'cyr' ? unit?.cirilica ?? toCyrillic(text) : text;
   }
 
   /** A census note from the data (written in Montenegrin) in the current language. */

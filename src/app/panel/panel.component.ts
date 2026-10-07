@@ -1,6 +1,6 @@
 import { Component, DestroyRef, ElementRef, Injector, afterNextRender, computed, inject, signal } from '@angular/core';
 import { CensusStore } from '../census/census.store';
-import { GroupShare, OTHER_KEY, TOPICS, Topic, groupShares } from '../census/census.model';
+import { GroupShare, OTHER_KEY, TOPICS, Topic } from '../census/census.model';
 import { I18n } from '../core/i18n.service';
 import { PieChartComponent } from './pie-chart.component';
 import { CompareComponent } from './compare.component';
@@ -94,8 +94,8 @@ export class PanelComponent {
     const mode = this.store.mode();
     const order = TOPICS.filter(t => this.store.hasTopic(t)).sort((a, b) => Number(b === mode) - Number(a === mode));
     return order.map(topic => {
-      const current = groupShares(e, topic);
-      const previous = prev && this.store.hasTopic(topic, this.store.previous()) ? groupShares(prev, topic) : null;
+      const current = this.store.shares(e, topic);
+      const previous = prev && this.store.hasTopic(topic, this.store.previous()) ? this.store.shares(prev, topic) : null;
       return {
         topic,
         current,
@@ -132,6 +132,7 @@ export class PanelComponent {
     }));
   });
 
+  readonly areaNote = computed(() => this.i18n.t(this.store.country().code === 'mk' ? 'areaNoteMk' : 'areaNote'));
   readonly source = computed(() => this.store.current()?.census.izvor ?? '');
   readonly censusNote = computed(() => {
     const text = this.store.current()?.census.napomena;
